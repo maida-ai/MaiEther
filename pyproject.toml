@@ -1,0 +1,96 @@
+[project]
+name = "MaiEther"
+description = "Tiny-yet-powerful Python framework for building composable AI agents and durable workflows."
+readme = "README.md"
+requires-python = ">=3.11"
+dynamic = [
+    "version",
+]
+
+[build-system]
+requires = ["poetry-core>=1.0.0", "poetry-dynamic-versioning>=1.0.0,<2.0.0"]
+build-backend = "poetry_dynamic_versioning.backend"
+
+[tool.setuptools.dynamic]
+version = {file=["version"]}
+
+[tool.poetry]
+package-mode = false
+version = "0.0.0"
+
+[tool.poetry.dependencies]
+# Core Dependencies
+anyio = "^4.9.0"
+pydantic = "^2.11.7"
+# Observability
+opentelemetry-api = "^1.35.0"
+opentelemetry-sdk = "^1.35.0"
+opentelemetry-instrumentation = "^0.56b0"
+# Async Support
+asyncio-mqtt = "^0.16.2"
+# Data Processing
+numpy = "^2.3.2"
+pandas = "^2.3.1"
+# Utilities
+click = "^8.2.1"
+pyyaml = "^6.0.2"
+
+[tool.poetry.group.dev.dependencies]
+# Testing
+pytest = "^8.4.1"
+pytest-asyncio = "^1.1.0"
+pytest-cov = "^6.2.1"
+pytest-mock = "^3.14.1"
+# Code Quality
+black = "^25.1.0"
+ruff = "^0.12.5"
+mypy = "^1.17.0"
+pre-commit = "^4.2.0"
+# Type Checking
+types-requests = "^2.32.4.20250611"
+# Development Tools
+ipython = "^9.4.0"
+jupyter = "^1.1.1"
+# Modern Development Tools
+rich = "^14.1.0"
+typer = "^0.16.0"
+watchdog = "^6.0.0"
+
+[tool.poetry.group.docs.dependencies]
+# Documentation
+sphinx = "^8.2.3"
+sphinx-rtd-theme = "^3.0.2"
+
+[tool.poetry-dynamic-versioning]
+enable = true
+from-file = {source="version"}
+
+[tool.poetry-dynamic-versioning.substitution]
+files = ["*.py", "*/__init__.py", "*/__version__.py", "*/_version.py"]
+patterns = [
+    '''(^__version__\s*(?::.*?)?=\s*['"])[^'"]*(['"])''',
+    { value = '''(^__version_tuple__\s*(?::.*?)?=\s*\()[^)]*(\))''', mode = "tuple" },
+]
+
+[tool.poetry.requires-plugins]
+poetry-dynamic-versioning = { version = ">=1.0.0,<2.0.0", extras = ["plugin"] }
+
+# Development Tools Configuration
+
+[tool.black]
+line-length = 120
+target-version = ['py311']
+include = '\.pyi?$'
+extend-exclude = '''
+/(
+  # directories
+  \.eggs
+  | \.git
+  | \.hg
+  | \.mypy_cache
+  | \.tox
+  | \.venv
+  | build
+  | dist
+)/
+'''

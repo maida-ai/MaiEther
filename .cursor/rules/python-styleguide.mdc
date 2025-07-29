@@ -1,0 +1,27 @@
+---
+description: Coding Styleguide
+globs: *.py
+alwaysApply: false
+---
+
+- Line length: 120 characters (modern screen-friendly)
+- Type hints: Required for all public APIs
+- Docstrings: Google style for all public methods
+- Imports: Sorted with isort, Black-compatible
+- String formatting: f-strings preferred over .format() or %
+
+## Import Patterns
+- Use absolute imports within the package
+- Keep imports at module level when possible
+- Group imports: stdlib, third-party, local
+- Use `from typing import` for type hints (not `import typing`)
+- Prefer `from pathlib import Path` over `import pathlib`
+
+## Specific Patterns
+- **Type annotations**: Use `list[str]` instead of `List[str]` (Python 3.9+)
+- **Union types**: Use `str | None` instead of `Union[str, None]` (Python 3.10+)
+- **Match statements**: Use `match/case` for complex conditionals (Python 3.10+)
+- **Dataclasses**: Use `@dataclass` for simple data containers
+- **Context managers**: Use `contextlib.ExitStack` for multiple contexts
+- **Async patterns**: Use `asyncio.gather()` for concurrent operations
+- **Error handling**: Use specific exception types, avoid bare `except:`

@@ -1,0 +1,84 @@
+---
+description: Coding Guidelines
+globs: ether/**/*.py
+alwaysApply: false
+---
+
+## Import Patterns
+- Use absolute imports within the package
+- Keep imports at module level when possible
+- Group imports: stdlib, third-party, local
+- Use `from typing import` for type hints (not `import typing`)
+- Prefer `from pathlib import Path` over `import pathlib`
+
+## Modern Python Patterns
+- **Type annotations**: Use `list[str]` instead of `List[str]` (Python 3.9+)
+- **Union types**: Use `str | None` instead of `Union[str, None]` (Python 3.10+)
+- **Match statements**: Use `match/case` for complex conditionals (Python 3.10+)
+- **Dataclasses**: Use `@dataclass` for simple data containers
+- **Context managers**: Use `contextlib.ExitStack` for multiple contexts
+- **Async patterns**: Use `asyncio.gather()` for concurrent operations
+- **Error handling**: Use specific exception types, avoid bare `except:`
+
+## When Modifying Existing Code
+1. **Preserve API compatibility**: Don't break existing interfaces
+2. **Update documentation**: Keep docs in sync with code
+3. **Add tests**: Ensure new functionality is tested
+4. **Run quality checks**: Black, Ruff, MyPy before committing
+
+## When Adding Dependencies
+1. **Minimal dependencies**: Prefer standard library when possible
+2. **Version pinning**: Use specific versions in requirements
+3. **Optional dependencies**: Use extras for optional features
+4. **Documentation**: Update installation instructions
+
+## Documentation
+
+- Every module, class, and method must have a comprehensive docstring
+- The docstrings must have the following parts separated by an empty line:
+  - One line description (descriptive, such as "Adds ...", "Modifies ...", "Computes ...", etc.)
+  - An expanded description (optional for simple modules / functions)
+  - `Args:`, `Returns:`, and `Raises:` sections describing the IO and errors if applicable
+  - `Example:` section (if applicable) showing how to use this
+- The docstrings must follow the `numpy` and `pytorch` style, with an intention to compile online documentation using `sphinx`
+
+## Good Patterns
+- **Define explicit Pydantic models** for all inputs and outputs
+- **Use strong typing** - avoid `Any` types in public APIs
+- Implement both sync and async forward methods if necessary
+- Use context for cross-cutting concerns (timeouts, tracing)
+- Leverage `.with_()` for configuration
+- Write comprehensive tests including type validation
+
+## Anti-Patterns
+- **Don't use `Any` types** in public APIs - define explicit Pydantic models
+- **Don't skip type validation** - let Pydantic handle runtime checks
+- Don't hardcode configuration values
+- Don't ignore type hints
+- Don't skip error handling
+
+## Performance Considerations
+
+**Async Execution**
+- Keep sync forward methods fast and non-blocking
+- Use thread pool for CPU-intensive operations
+- Leverage async forward for I/O operations
+- Avoid blocking the event loop
+
+**Memory Management**
+- Use zero-copy data flow when possible
+- Implement proper cleanup in `__del__` if needed
+- Monitor memory usage in long-running workflows
+
+## Debugging & Troubleshooting
+
+**Common Issues**
+- **Type validation errors**: Ensure Pydantic models are properly defined and validated
+- **Async/sync confusion**: Let runtime handle detection
+
+### Debugging Tools
+- To run python commands use `poetry run python`
+- **Use Pydantic validation errors** to debug type issues
+- Enable OpenTelemetry tracing for workflow analysis
+- Use pytest with `-v` for verbose test output
+- Check coverage with `pytest --cov=mai`

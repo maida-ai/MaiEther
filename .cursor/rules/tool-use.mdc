@@ -1,0 +1,9 @@
+---
+alwaysApply: true
+---
+- `python`
+  - Use `poetry run python`
+  - If installing packages, either use `poetry add` or `poetry run pip`
+- System-wide
+  - Always ask before running system commands
+  - Always add `-p` argument to `mkdir`

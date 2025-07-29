@@ -1,0 +1,19 @@
+---
+alwaysApply: true
+---
+
+## Project Overview
+MaiEther defines the *intermediate representation (IR)* and a Python reference implementation (Pydantic v2) for an envelope called **Ether** that safely transports data between nodes/layers.
+Integrates with adapters and a schema registry; can be carried over in‑memory calls, multiprocess queues, or a binary transport (e.g., **XCP**).
+
+## AI Assistant Guidelines
+
+When helping with this codebase:
+
+- **Emphasize strong typing**: Always define explicit Pydantic models for data transfer
+- **Enforce "Know your types; Fail if unsure"**: Reject `Any` types in public APIs
+- **Consider async/sync**: Always think about both execution modes
+- **Include tests**: Always suggest or provide test code including type validation
+- **Update documentation**: Keep docs/docstrings in sync with code changes
+- **Think production**: Consider observability, error handling, performance
+- **Maintain consistency**: Follow established patterns and conventions

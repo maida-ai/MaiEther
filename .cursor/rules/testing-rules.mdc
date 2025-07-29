@@ -1,0 +1,14 @@
+---
+description: Rules for writing tests
+globs: tests/**/*.py
+alwaysApply: false
+---
+
+- Unit tests for all new functionality
+- Test both sync and async forward methods
+- **Type validation tests** - ensure Pydantic models work correctly
+- **Edge case testing** - test invalid inputs and type mismatches
+- Aim for >90% test coverage
+- Include edge cases and error conditions in the tests
+- Directory structure of the tests must follow the directory structure under `ether/`
+  - For example, tests for `ether/layers/some_file.py` must reside under `tests/layers/test_some_file.py`
