@@ -1,3 +1,7 @@
+# Issue tracker for code assistant
+.issues/**/*
+!.issues/.gitkeep
+
 # Python-generated files
 __pycache__/
 *.py[oc]

@@ -11,6 +11,14 @@ repos:
         types_or: [text]
         exclude: ^hooks/
         pass_filenames: true
+      - id: pytest-check
+        name: pytest
+        entry: pytest
+        language: system
+        pass_filenames: false
+        always_run: true
+        args: [--tb=short]
+        stages: [pre-push]
 
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v5.0.0
@@ -30,7 +38,7 @@ repos:
         args: []
 
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.12.5
+    rev: v0.12.7
     hooks:
       - id: ruff
         args: [--fix, --exit-non-zero-on-fix]
@@ -42,12 +50,12 @@ repos:
         additional_dependencies: [types-requests]
         args: [--ignore-missing-imports]
 
-  - repo: local
-    hooks:
-      - id: pytest-check
-        name: pytest
-        entry: pytest
-        language: system
-        pass_filenames: false
-        always_run: true
-        args: [--tb=short]
+  # - repo: local
+  #   hooks:
+  #     - id: pytest-check
+  #       name: pytest
+  #       entry: pytest
+  #       language: system
+  #       pass_filenames: false
+  #       always_run: true
+  #       args: [--tb=short]

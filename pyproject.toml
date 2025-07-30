@@ -11,9 +11,6 @@ dynamic = [
 requires = ["poetry-core>=1.0.0", "poetry-dynamic-versioning>=1.0.0,<2.0.0"]
 build-backend = "poetry_dynamic_versioning.backend"
 
-[tool.setuptools.dynamic]
-version = {file=["version"]}
-
 [tool.poetry]
 package-mode = false
 version = "0.0.0"
@@ -43,7 +40,7 @@ pytest-cov = "^6.2.1"
 pytest-mock = "^3.14.1"
 # Code Quality
 black = "^25.1.0"
-ruff = "^0.12.5"
+ruff = "^0.12.7"
 mypy = "^1.17.0"
 pre-commit = "^4.2.0"
 # Type Checking

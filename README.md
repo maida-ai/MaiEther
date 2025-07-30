@@ -4,6 +4,12 @@
 **Audience:** Software engineers building a composable ML/data system with swappable nodes (local + cross-process + cross-server).
 **Scope:** Defines the *intermediate representation (IR)* and a Python reference implementation (Pydantic v2) for an envelope called **Ether** that safely transports data between nodes/layers. Integrates with adapters and a schema registry; can be carried over in-memory calls, multiprocess queues, or a binary transport (e.g., **XCP**).
 
+## Glossary
+
+| Term | Definition |
+| --- | --- |
+| Zero-Copy | Data transfer between memory spaces without requiring the CPU to copy the data. |
+
 
 ## 1. Goals & Non-Goals
 
@@ -131,13 +137,13 @@ Focus on the common IRs to start:
 * **attachments**:
   * `data`: `buffer` / URI
 * **metadata**:
-  * `size`: `tuple(int, int)` (H / W)
+  * `size`: `[int, int]` (H / W)
   * `mode`: `RGB|L|...`?
 
 #### `logits.v1`
 
 * **payload**:
-  * `values`: `list[float] | numpy.ndarray`
+  * `values`: `list[float]`  (or numpy array)
   * `shape`: `list[int]`
 * **metadata**:
   * `task`: str
@@ -151,6 +157,8 @@ Focus on the common IRs to start:
 ## 4. Python Reference Implementation (Pydantic v2)
 
 ### 4.1 Core classes
+
+**TODO**: At some point we should rewrite these in some compiled language
 
 ```python
 from __future__ import annotations
@@ -183,8 +191,8 @@ class Attachment(BaseModel):
 class EtherSpec:
     payload_fields: Tuple[str, ...]
     metadata_fields: Tuple[str, ...]
-    extra_policy: str = "ignore"         # "ignore" | "keep" | "error"
-    renames: Mapping[str, str] = None    # model_field -> ether dot path
+    extra_fields: str = "ignore"         # "ignore" | "keep" | "error"
+    renames: Mapping[str, str] = ...     # model_field -> ether dot path
     kind: Optional[str] = None
 
     def __post_init__(self):
@@ -274,11 +282,11 @@ class Ether(BaseModel):
         for f in spec.metadata_fields:
             set_by_path(metadata, spec.renames.get(f, f), data.get(f))
 
-        if spec.extra_policy == "error":
+        if spec.extra_fields == "error":
             unlisted = [f for f in data if f not in listed]
             if unlisted:
                 raise ConversionError(f"Extra fields not allowed: {sorted(unlisted)}")
-        elif spec.extra_policy == "keep":
+        elif spec.extra_fields == "keep":
             for f, v in data.items():
                 if f not in listed:
                     extras[f] = v
@@ -514,7 +522,7 @@ message EtherProto {
 
 * **At model boundaries**:
 
-  * On `from_model`: enforce `extra_policy` (`ignore|keep|error`).
+  * On `from_model`: enforce `extra_fields` (`ignore|keep|error`).
   * On `as_model`: raise `ConversionError` with **missing field list**; prefer clear messages.
   * If `require_kind=True`, enforce `(target.kind == ether.kind)`.
 

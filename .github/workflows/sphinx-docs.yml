@@ -5,7 +5,7 @@ on:
     branches: [ main, develop ]
     paths:
       - 'docs/**'
-      - 'mai/**'
+      - 'ether/**'
       - 'pyproject.toml'
       - 'poetry.lock'
       - '.github/workflows/sphinx-docs.yml'
@@ -13,7 +13,7 @@ on:
     branches: [ main, develop ]
     paths:
       - 'docs/**'
-      - 'mai/**'
+      - 'ether/**'
       - 'pyproject.toml'
       - 'poetry.lock'
       - '.github/workflows/sphinx-docs.yml'
@@ -24,51 +24,82 @@ permissions:
   pages: write
   id-token: write
 
+# Recommended for GitHub Pages so only the latest build is deployed
 concurrency:
-  group: "pages"
-  cancel-in-progress: false
+  group: pages
+  cancel-in-progress: true
 
 jobs:
+  docs-directory:
+    runs-on: ubuntu-latest
+    outputs:
+      docs-exists: ${{ steps.check-docs.outputs.exists }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Check if docs directory exists
+        id: check-docs
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ -d "docs" ]; then
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+            echo "docs directory exists"
+          else
+            echo "exists=false" >> "$GITHUB_OUTPUT"
+            echo "docs directory does not exist, skipping documentation build"
+          fi
+
   build:
     runs-on: ubuntu-latest
+    needs: docs-directory
+    if: needs.docs-directory.outputs.docs-exists == 'true'
+    timeout-minutes: 30
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
       - name: Set up Python
-        uses: actions/setup-python@v4
+        id: setup-python
+        uses: actions/setup-python@v5
         with:
           python-version: '3.11'
+          cache: poetry
+          cache-dependency-path: '**/poetry.lock'
 
       - name: Install Poetry
         uses: snok/install-poetry@v1
         with:
-          version: latest
+          version: 2.1.3
           virtualenvs-create: true
           virtualenvs-in-project: true
 
       - name: Load cached venv
         id: cached-poetry-dependencies
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: .venv
           key: venv-${{ runner.os }}-${{ steps.setup-python.outputs.python-version }}-${{ hashFiles('**/poetry.lock') }}
+          restore-keys: |
+            venv-${{ runner.os }}-${{ steps.setup-python.outputs.python-version }}-
+            venv-${{ runner.os }}-
 
       - name: Install dependencies
         if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
-        run: poetry install --with dev,docs
+        run: poetry install --with dev,docs --no-interaction --no-ansi
 
       - name: Generate API documentation
         run: |
           cd docs
-          poetry run sphinx-apidoc -o . ../mai/ --force
+          poetry run sphinx-apidoc -o . ../docs/ --force
 
       - name: Build documentation
+        env:
+          SPHINXOPTS: "-n -W --keep-going"
         run: |
           cd docs
           poetry run sphinx-build -b html . _build/html
-        env:
-          SPHINXOPTS: "-W --keep-going"
 
       - name: Setup Pages
         uses: actions/configure-pages@v4
@@ -78,13 +109,23 @@ jobs:
         with:
           path: docs/_build/html
 
+      # Optional: store the HTML as a regular artifact for PRs/debugging
+      - name: Upload docs as artifact (optional)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: docs-html
+          path: docs/_build/html
+          if-no-files-found: ignore
+          retention-days: 7
+
   deploy:
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
-    needs: build
-    if: github.ref == 'refs/heads/main'
+    needs: [docs-directory, build]
+    if: github.ref == 'refs/heads/main' && needs.docs-directory.outputs.docs-exists == 'true'
     steps:
       - name: Deploy to GitHub Pages
         id: deployment
