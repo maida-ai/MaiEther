@@ -38,9 +38,9 @@ docs/_build/
 docs/_static/
 docs/_templates/
 # Auto-generated API documentation
-docs/mai.rst
-docs/mai.layers.rst
-docs/mai.types.rst
+docs/ether.rst
+docs/ether.layers.rst
+docs/ether.types.rst
 docs/modules.rst
 
 # Jupyter Notebooks

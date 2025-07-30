@@ -81,4 +81,4 @@ alwaysApply: false
 - **Use Pydantic validation errors** to debug type issues
 - Enable OpenTelemetry tracing for workflow analysis
 - Use pytest with `-v` for verbose test output
-- Check coverage with `pytest --cov=mai`
+- Check coverage with `pytest --cov=ether`

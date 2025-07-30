@@ -4,7 +4,7 @@ on:
   push:
     branches: [ main, develop ]
     paths:
-      - 'mai/**'
+      - 'ether/**'
       - 'tests/**'
       - 'pyproject.toml'
       - 'poetry.lock'
@@ -12,7 +12,7 @@ on:
   pull_request:
     branches: [ main, develop ]
     paths:
-      - 'mai/**'
+      - 'ether/**'
       - 'tests/**'
       - 'pyproject.toml'
       - 'poetry.lock'
@@ -106,7 +106,7 @@ jobs:
           # export PYTEST_ADDOPTS="-n auto"
           poetry run pytest tests/ \
             -m "not integration and not slow" \
-            --cov=mai \
+            --cov=ether \
             --cov-report=xml \
             --cov-report=term-missing \
             --cov-report=html \
