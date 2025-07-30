@@ -1,3 +1,5 @@
+default_install_hook_types: [pre-commit, pre-push]
+default_stages: [pre-commit]
 repos:
   - repo: local
     hooks:
@@ -11,6 +13,7 @@ repos:
         types_or: [text]
         exclude: ^hooks/
         pass_filenames: true
+
       - id: pytest-check
         name: pytest
         entry: pytest
@@ -24,11 +27,16 @@ repos:
     rev: v5.0.0
     hooks:
       - id: trailing-whitespace
+        stages: [pre-commit]
       - id: end-of-file-fixer
-      - id: check-yaml
+        stages: [pre-commit]
       - id: check-added-large-files
+        stages: [pre-commit]
+      - id: check-yaml
+        stages: [pre-commit]
       - id: check-merge-conflict
       - id: debug-statements
+        stages: [pre-commit]
 
   - repo: https://github.com/psf/black
     rev: 25.1.0
@@ -36,6 +44,7 @@ repos:
       - id: black
         language_version: python3.11
         args: []
+
 
   - repo: https://github.com/astral-sh/ruff-pre-commit
     rev: v0.12.7
