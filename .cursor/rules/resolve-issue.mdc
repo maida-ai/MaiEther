@@ -1,0 +1,29 @@
+---
+alwaysApply: false
+---
+
+**Task Rules**
+- Create a code change / PR to resolve an issue
+- The issue will be given to you either as a filename or `#XX` format
+  - The issue file will be located under `.issues/issue-XX.md`
+- The issue file will have the issue description as well as acceptance criteria
+- Read through the README.md, as well as any documentation provided by the user
+
+**Code Rules**
+- The code to resolve the issue must be atomic, and only focus on the issue itself
+- The code should adhere to all coding standards
+- Once the code is written you must make sure it passes tests if applicable, as well as coverage
+- One all the tests are done, create a file `.issues/commit-msg-XX.md` with a brief commit message with a bulletlist of changes that were introduced.
+  - `XX` is the same as in the issue file name.
+  - Commit message must have the following structure (split by blank lines):
+    - Start with the title (usually the same as in the issue description)
+    - "Fixes #XX", where `XX` is the issue number
+    - A brief description with motivation (ONLY if applicable)
+    - Bullet list of changes
+  - The bulletlist should be very high level, and not longer than 3-4 items. It should exclude common-sense changes such as "Added tests" (this is required anyway), "Added to `__init__.py`" (this is often required), etc.
+    - Bulletlist should only include functional changes
+    - Exceptions: Sometimes the issue is about tests or lint or imports, or other obvious things. In that case we should make sure we add it to change list
+
+**In rare occasions**
+- If there is a pre-requisite PR that you need to create before starting on resolving the issue, let the user know
+- Ask if you should create a prerequisite issue under `.issues/issue-XX-pre-YY.md`, where `YY` is another number
