@@ -60,6 +60,9 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Install poetry
+        run: pipx install poetry
+
       - name: Set up Python
         id: setup-python
         uses: actions/setup-python@v5
@@ -68,12 +71,12 @@ jobs:
           cache: poetry
           cache-dependency-path: '**/poetry.lock'
 
-      - name: Install Poetry
-        uses: snok/install-poetry@v1
-        with:
-          version: 2.1.3
-          virtualenvs-create: true
-          virtualenvs-in-project: true
+      # - name: Install Poetry
+      #   uses: snok/install-poetry@v1
+      #   with:
+      #     version: 2.1.3
+      #     virtualenvs-create: true
+      #     virtualenvs-in-project: true
 
       - name: Load cached venv
         id: cached-poetry-dependencies
