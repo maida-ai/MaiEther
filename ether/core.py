@@ -3,6 +3,28 @@
 This module defines the core Ether envelope model that safely transports data
 between nodes/layers in composable ML/data systems. The Ether envelope provides
 a standardized way to carry structured data with metadata and attachments.
+
+The Ether class provides the main envelope functionality with methods for:
+- Registration of Pydantic models for conversion
+- Adapter functions for complex model conversions
+- Conversion between models and Ether envelopes
+- Summary generation for debugging and logging
+
+Examples:
+    >>> from ether import Ether, Attachment
+    >>> from pydantic import BaseModel
+    >>>
+    >>> # Register a model for conversion
+    >>> @Ether.register(payload=["embedding"], metadata=["source"], kind="embedding")
+    ... class EmbeddingModel(BaseModel):
+    ...     embedding: list[float]
+    ...     source: str
+    >>>
+    >>> # Convert model to Ether
+    >>> model = EmbeddingModel(embedding=[1.0, 2.0], source="bert")
+    >>> ether = Ether.from_model(model)
+    >>> ether.kind == "embedding"
+    True
 """
 
 from collections.abc import Callable, Mapping, Sequence
