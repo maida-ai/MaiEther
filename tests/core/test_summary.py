@@ -1,5 +1,7 @@
 """Tests for Ether summary functionality."""
 
+from pydantic import BaseModel
+
 from ether.attachment import Attachment
 from ether.core import Ether
 
@@ -77,3 +79,52 @@ class TestEtherSummary:
         summary = ether.summary()
 
         assert summary["extra_keys"] == ["note", "priority"]
+
+    def test_summary_with_source_model(self) -> None:
+        """Test summary includes source_model name when created from a registered model."""
+
+        @Ether.register(
+            payload=["embedding"],
+            metadata=["source"],
+            kind="embedding",
+        )
+        class TestModel(BaseModel):
+            embedding: list[float]
+            source: str
+
+        model = TestModel(embedding=[1.0, 2.0, 3.0], source="test-model")
+        ether = Ether.from_model(model)
+
+        summary = ether.summary()
+
+        assert summary["source_model"] == "TestModel"
+        assert summary["kind"] == "embedding"
+        assert summary["schema_version"] == 1
+        assert summary["payload_keys"] == ["embedding"]
+        assert summary["metadata_keys"] == ["source"]
+        assert summary["extra_keys"] == []
+        assert summary["attachments"] == []
+
+    def test_summary_with_complex_nested_structure(self) -> None:
+        """Test summary with complex nested structure in payload and metadata."""
+        ether = Ether(
+            kind="complex",
+            payload={
+                "data": {"features": {"embeddings": [1.0, 2.0], "metadata": {"dim": 2}}, "config": {"model": "test"}}
+            },
+            metadata={
+                "provenance": {"source": "test", "timestamp": "2023-01-01"},
+                "processing": {"steps": ["normalize", "encode"]},
+            },
+            extra_fields={"debug": True, "version": "1.0"},
+        )
+
+        summary = ether.summary()
+
+        assert summary["payload_keys"] == [
+            "data.config.model",
+            "data.features.embeddings",
+            "data.features.metadata.dim",
+        ]
+        assert summary["metadata_keys"] == ["processing.steps", "provenance.source", "provenance.timestamp"]
+        assert summary["extra_keys"] == ["debug", "version"]
