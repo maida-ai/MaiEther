@@ -29,8 +29,9 @@ alwaysApply: false
 - You can run reduced coverage using this command
   ```shell
   poetry run pytest tests/<test file name> \
-    --cov=ether \
-    --cov-report=term-missing
+    --cov=ether.<module name> \
+    --cov-report=term-missing \
+    --strict-markers
   ```
 - You can run complete coverage using this command.
   This can help you identify if the coverage is needed by your tests
