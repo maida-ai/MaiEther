@@ -100,6 +100,5 @@ class TestEtherSpec:
         """Test that EtherSpec instances are not hashable due to dict field."""
         spec = EtherSpec(payload_fields=("field1",), metadata_fields=("meta1",))
 
-        # Should raise TypeError when trying to hash
         with pytest.raises(TypeError, match="unhashable type"):
             hash(spec)
