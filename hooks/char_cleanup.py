@@ -31,6 +31,10 @@ def get_replace_map() -> dict[str, str]:
         # Smart punctuation
         "…": "...",
         "·": ".",
+        "•": "*",
+        "∙": "*",
+        "∘": "*",
+        "∗": "*",
         # Latexable symbols
         "≤": r"$\leq$",
         "≥": r"$\geq$",

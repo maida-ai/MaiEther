@@ -1,3 +1,7 @@
+# Temp files and sandboxes
+temp.*
+_scripts.py
+
 # Issue tracker for code assistant
 .issues/**/*
 !.issues/.gitkeep
