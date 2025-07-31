@@ -1,5 +1,10 @@
 # MaiEther
 
+[![codecov](https://codecov.io/github/maida-ai/MaiEther/graph/badge.svg)](https://codecov.io/github/maida-ai/MaiEther)
+[![unittests](https://github.com/maida-ai/MaiEther/actions/workflows/tests.yml/badge.svg)](https://github.com/maida-ai/MaiEther/actions/workflows/tests.yml)
+[![documentation](https://github.com/maida-ai/MaiEther/actions/workflows/sphinx-docs.yml/badge.svg)](https://github.com/maida-ai/MaiEther/actions/workflows/sphinx-docs.yml)
+
+
 **Status:** Draft for implementation
 **Audience:** Software engineers building a composable ML/data system with swappable nodes (local + cross-process + cross-server).
 **Scope:** Defines the *intermediate representation (IR)* and a Python reference implementation (Pydantic v2) for an envelope called **Ether** that safely transports data between nodes/layers. Integrates with adapters and a schema registry; can be carried over in-memory calls, multiprocess queues, or a binary transport (e.g., **XCP**).

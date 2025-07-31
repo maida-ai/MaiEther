@@ -117,21 +117,21 @@ jobs:
             --strict-markers \
             --tb=short
 
-      - name: Upload HTML coverage (artifact)
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: coverage-html
-          path: htmlcov
-          if-no-files-found: ignore
-          retention-days: 7
+      # - name: Upload HTML coverage (artifact)
+      #   if: always()
+      #   uses: actions/upload-artifact@v4
+      #   with:
+      #     name: coverage-html
+      #     path: htmlcov
+      #     if-no-files-found: ignore
+      #     retention-days: 7
 
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v5
         with:
           token: ${{ secrets.CODECOV_TOKEN }}  # not required for public repos
-          files: ./coverage.xml
-          flags: unittests
-          name: unit-tests
-          fail_ci_if_error: true
-          verbose: true
+          # files: ./coverage.xml
+          # flags: unittests
+          # name: unit-tests
+          # fail_ci_if_error: true
+          # verbose: true
