@@ -9,5 +9,6 @@ queues, or binary transports.
 
 from .attachment import Attachment
 from .errors import ConversionError, RegistrationError
+from .spec import EtherSpec
 
-__all__ = ["Attachment", "ConversionError", "RegistrationError"]
+__all__ = ["Attachment", "ConversionError", "EtherSpec", "RegistrationError"]
