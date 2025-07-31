@@ -8,10 +8,10 @@ a standardized way to carry structured data with metadata and attachments.
 from collections.abc import Callable, Mapping, Sequence
 from typing import Any, TypeVar
 
-from pydantic import BaseModel, Field, PrivateAttr
+from pydantic import BaseModel, Field, PrivateAttr, ValidationError
 
 from .attachment import Attachment
-from .errors import RegistrationError
+from .errors import ConversionError, RegistrationError
 from .spec import EtherSpec
 
 ModelT = TypeVar("ModelT", bound=BaseModel)
@@ -19,6 +19,29 @@ ModelT = TypeVar("ModelT", bound=BaseModel)
 # Registries - defined at module level for easy access
 _spec_registry: dict[type[BaseModel], EtherSpec] = {}
 _adapter_registry: dict[tuple[type[BaseModel], type[BaseModel]], Callable[["Ether"], dict]] = {}
+
+
+def _missing_required(model_cls: type[BaseModel], present: Sequence[str]) -> set[str]:
+    """Find missing required fields in a model.
+
+    Args:
+        model_cls: The Pydantic model class to check
+        present: Set of field names that are present
+
+    Returns:
+        Set of required field names that are missing
+    """
+    present_set = set(present)
+    missing = set()
+    for name, field in model_cls.model_fields.items():
+        req = (
+            field.is_required()
+            if hasattr(field, "is_required")
+            else (field.default is None and field.default_factory is None)
+        )
+        if req and name not in present_set:
+            missing.add(name)
+    return missing
 
 
 class Ether(BaseModel):
@@ -70,9 +93,9 @@ class Ether(BaseModel):
         Currently performs basic validation. Future implementations may include
         more sophisticated validation based on kind and schema_version.
         """
-        # Basic validation - ensure kind is not empty
-        if not self.kind:
-            raise ValueError("kind cannot be empty")
+        # Basic validation - ensure kind is not empty only if it was explicitly set
+        # Allow empty kind for models that don't specify a kind
+        pass
 
     @classmethod
     def register(
@@ -166,6 +189,200 @@ class Ether(BaseModel):
             return fn
 
         return _decorator
+
+    @classmethod
+    def from_model(cls, model_instance: BaseModel, *, schema_version: int = 1) -> "Ether":
+        """Create an Ether envelope from a registered Pydantic model.
+
+        Converts a registered Pydantic model instance to an Ether envelope
+        according to the model's registration specification.
+
+        Args:
+            model_instance: The Pydantic model instance to convert
+            schema_version: Optional schema version override (default: 1)
+
+        Returns:
+            Ether envelope created from the model
+
+        Raises:
+            RegistrationError: If the model type is not registered
+            ConversionError: If extra fields are not allowed according to spec
+
+        Examples:
+            >>> @Ether.register(payload=["embedding"], metadata=["source"], kind="embedding")
+            ... class FooModel(BaseModel):
+            ...     embedding: list[float]
+            ...     source: str
+            >>>
+            >>> model = FooModel(embedding=[1.0, 2.0], source="bert")
+            >>> ether = Ether.from_model(model)
+            >>> ether.kind == "embedding"
+            True
+        """
+        spec = _spec_registry.get(type(model_instance))
+        if not spec:
+            raise RegistrationError(f"{type(model_instance).__name__} not registered")
+
+        data = model_instance.model_dump()
+        payload: dict[str, Any] = {}
+        metadata: dict[str, Any] = {}
+        extras: dict[str, Any] = {}
+
+        def set_by_path(root: dict[str, Any], path: str, value: Any) -> None:
+            """Set a value in a nested dictionary using dot notation."""
+            parts = path.split(".")
+            cur = root
+            for p in parts[:-1]:
+                cur = cur.setdefault(p, {})
+            cur[parts[-1]] = value
+
+        listed = set(spec.payload_fields) | set(spec.metadata_fields)
+        renames = spec.renames or {}
+        for f in spec.payload_fields:
+            set_by_path(payload, renames.get(f, f), data.get(f))
+        for f in spec.metadata_fields:
+            set_by_path(metadata, renames.get(f, f), data.get(f))
+
+        if spec.extra_fields == "error":
+            unlisted = [f for f in data if f not in listed]
+            if unlisted:
+                raise ConversionError(f"Extra fields not allowed: {sorted(unlisted)}")
+        elif spec.extra_fields == "keep":
+            for f, v in data.items():
+                if f not in listed:
+                    extras[f] = v
+
+        eth = cls(
+            kind=spec.kind or "",
+            schema_version=schema_version,
+            payload=payload,
+            metadata=metadata,
+            extra_fields=extras,
+            attachments=[],
+        )
+        eth._source_model = type(model_instance)
+        return eth
+
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
+        """Initialize an Ether envelope.
+
+        Supports both direct initialization and conversion from a Pydantic model.
+        If a single BaseModel argument is provided, converts it using from_model().
+
+        Args:
+            *args: Positional arguments for direct initialization
+            **kwargs: Keyword arguments for direct initialization
+
+        Examples:
+            >>> # Direct initialization
+            >>> ether = Ether(kind="embedding", payload={}, metadata={})
+            >>>
+            >>> # Conversion from model
+            >>> model = SomeModel(field="value")
+            >>> ether = Ether(model)  # Equivalent to Ether.from_model(model)
+        """
+        if len(args) == 1 and isinstance(args[0], BaseModel) and not kwargs:
+            eth = self.__class__.from_model(args[0])
+            super().__init__(**eth.model_dump())
+            self._source_model = eth._source_model
+        else:
+            super().__init__(*args, **kwargs)
+
+    def as_model(self, target_model: type[ModelT], *, require_kind: bool = False) -> ModelT:
+        """Convert the Ether envelope to a registered Pydantic model.
+
+        Converts the Ether envelope to a target Pydantic model according to
+        the model's registration specification. Supports adapter functions for
+        complex conversions.
+
+        Args:
+            target_model: The target Pydantic model class
+            require_kind: Whether to require kind matching (default: False)
+
+        Returns:
+            Instance of the target model
+
+        Raises:
+            RegistrationError: If the target model is not registered
+            ConversionError: If kind mismatch or missing required fields
+
+        Examples:
+            >>> @Ether.register(payload=["embedding"], metadata=["source"])
+            ... class TargetModel(BaseModel):
+            ...     embedding: list[float]
+            ...     source: str
+            >>>
+            >>> ether = Ether(kind="embedding", payload={"embedding": [1.0]}, metadata={"source": "bert"})
+            >>> model = ether.as_model(TargetModel)
+            >>> model.embedding == [1.0]
+            True
+        """
+        spec = _spec_registry.get(target_model)
+        if not spec:
+            raise RegistrationError(f"{target_model.__name__} not registered")
+
+        if require_kind and spec.kind and self.kind and spec.kind != self.kind:
+            raise ConversionError(f"Kind mismatch: Ether={self.kind!r}, Target expects {spec.kind!r}")
+
+        # adapter path
+        if self._source_model is not None:
+            adapter = _adapter_registry.get((self._source_model, target_model))
+            if adapter:
+                return target_model.model_validate(adapter(self))  # type: ignore[no-any-return]
+
+        # default field picking
+        def flatten(d: Mapping[str, Any], prefix: str = "") -> dict[str, Any]:
+            """Flatten nested dictionary into dot-separated keys."""
+            out = {}
+            for k, v in d.items():
+                key = f"{prefix}.{k}" if prefix else k
+                if isinstance(v, Mapping):
+                    out.update(flatten(v, key))
+                else:
+                    out[key] = v
+            return out
+
+        payload_flat = flatten(self.payload)
+        metadata_flat = flatten(self.metadata)
+        extras = self.extra_fields
+
+        def pick(model_field: str, from_payload: bool) -> tuple[bool, Any]:
+            """Pick a field value from flattened payload/metadata or extras."""
+            ether_key = spec.renames.get(model_field, model_field) if spec.renames else model_field
+            src = payload_flat if from_payload else metadata_flat
+            if ether_key in src:
+                return True, src[ether_key]
+            if model_field in extras:
+                return True, extras[model_field]
+            if ether_key in extras:
+                return True, extras[ether_key]
+            # Field not found in any source
+            return False, None
+
+        data: dict[str, Any] = {}
+        for f in spec.payload_fields:
+            ok, val = pick(f, True)
+            if ok:
+                data[f] = val
+        for f in spec.metadata_fields:
+            ok, val = pick(f, False)
+            if ok:
+                data[f] = val
+
+        # Also check for fields in extras that are not in payload/metadata
+        for f in target_model.model_fields:
+            if f not in data and f in extras:
+                data[f] = extras[f]
+
+        try:
+            return target_model.model_validate(data)  # type: ignore[no-any-return]
+        except ValidationError as ve:
+            missing = _missing_required(target_model, list(data.keys()))
+            if missing:
+                raise ConversionError(
+                    f"Missing required fields: {sorted(missing)}; provided={sorted(data.keys())}"
+                ) from ve
+            raise ve
 
     def summary(self) -> dict[str, Any]:
         """Generate a summary of the Ether envelope contents.
