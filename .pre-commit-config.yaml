@@ -77,4 +77,7 @@ repos:
     hooks:
       - id: mypy
         additional_dependencies: [types-requests]
-        args: [--ignore-missing-imports]
+        args: [
+          --ignore-missing-imports,
+          --no-warn-unused-ignores  # pre-commit is isolated
+        ]

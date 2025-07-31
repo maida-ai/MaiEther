@@ -113,13 +113,14 @@ class TestAttachmentValidation:
     def test_validation_error_missing_required_fields(self) -> None:
         """Test that missing required fields raises ValidationError."""
         with pytest.raises(ValidationError):
-            Attachment()  # Missing id and media_type
+            # Missing id and media_type
+            Attachment()  # type: ignore[call-arg]
 
     def test_validation_error_invalid_id_type(self) -> None:
         """Test that invalid id type raises ValidationError."""
         with pytest.raises(ValidationError):
             Attachment(
-                id=123,  # Should be str
+                id=123,  # type: ignore[arg-type] # Should be str
                 uri="file:///data.bin",
                 media_type="application/x-raw-tensor",
             )
@@ -130,7 +131,7 @@ class TestAttachmentValidation:
             Attachment(
                 id="test-0",
                 uri="file:///data.bin",
-                media_type=123,  # Should be str
+                media_type=123,  # type: ignore[arg-type] # Should be str
             )
 
     def test_validation_error_invalid_inline_bytes_type(self) -> None:
@@ -138,7 +139,7 @@ class TestAttachmentValidation:
         with pytest.raises(ValueError, match="inline_bytes must be bytes or base64 string"):
             Attachment(
                 id="bad-bytes-0",
-                inline_bytes=12345,  # Invalid type
+                inline_bytes=12345,  # type: ignore[arg-type] # Invalid type
                 media_type="application/x-raw-tensor",
             )
 
