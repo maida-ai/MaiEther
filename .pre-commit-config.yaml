@@ -14,13 +14,33 @@ repos:
         exclude: ^hooks/
         pass_filenames: true
 
-      - id: pytest-check
+      - id: pytest-check-fast
         name: pytest
         entry: pytest
         language: system
         pass_filenames: false
         always_run: true
-        args: [--tb=short]
+        args: [
+          -m not integration and not slow,
+          --tb=short
+        ]
+        stages: [pre-commit]
+
+      - id: pytest-check-all
+        name: pytest
+        entry: pytest
+        language: system
+        pass_filenames: false
+        always_run: true
+        args: [
+            --cov=ether,
+            --cov-report=xml,
+            --cov-report=term-missing,
+            --cov-report=html,
+            --cov-fail-under=90,
+            --strict-markers,
+            --tb=short
+        ]
         stages: [pre-push]
 
   - repo: https://github.com/pre-commit/pre-commit-hooks
@@ -53,7 +73,7 @@ repos:
         args: [--fix, --exit-non-zero-on-fix]
 
   - repo: https://github.com/pre-commit/mirrors-mypy
-    rev: v1.17.0
+    rev: v1.17.1
     hooks:
       - id: mypy
         additional_dependencies: [types-requests]
