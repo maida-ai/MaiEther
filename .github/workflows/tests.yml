@@ -112,7 +112,6 @@ jobs:
             --cov=ether \
             --cov-report=xml \
             --cov-report=term-missing \
-            --cov-report=html \
             --cov-fail-under=90 \
             --strict-markers \
             --tb=short

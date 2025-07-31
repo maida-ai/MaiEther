@@ -5,8 +5,6 @@ to Ether envelope payload and metadata sections, including field renames and
 validation rules.
 """
 
-from __future__ import annotations
-
 from collections.abc import Mapping
 from dataclasses import dataclass
 

@@ -166,7 +166,6 @@ Focus on the common IRs to start:
 **TODO**: At some point we should rewrite these in some compiled language
 
 ```python
-from __future__ import annotations
 from typing import Any, Dict, Iterable, Mapping, Optional, Sequence, Tuple, Type, TypeVar, Callable
 from dataclasses import dataclass
 from pydantic import BaseModel, Field, PrivateAttr, ValidationError
