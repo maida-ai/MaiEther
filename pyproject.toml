@@ -1,6 +1,6 @@
 [project]
 name = "MaiEther"
-description = "Tiny-yet-powerful Python framework for building composable AI agents and durable workflows."
+description = "An envelope system for safe data transport between nodes/layers in composable ML/data systems."
 readme = "README.md"
 requires-python = ">=3.11"
 dynamic = [
@@ -12,8 +12,12 @@ requires = ["poetry-core>=1.0.0", "poetry-dynamic-versioning>=1.0.0,<2.0.0"]
 build-backend = "poetry_dynamic_versioning.backend"
 
 [tool.poetry]
-package-mode = false
+name = "MaiEther"
 version = "0.0.0"
+description = "An envelope system for safe data transport between nodes/layers"
+authors = []
+readme = "README.md"
+packages = [{include = "ether"}]
 
 [tool.poetry.dependencies]
 # Core Dependencies

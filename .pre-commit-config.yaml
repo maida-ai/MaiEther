@@ -58,13 +58,3 @@ repos:
       - id: mypy
         additional_dependencies: [types-requests]
         args: [--ignore-missing-imports]
-
-  # - repo: local
-  #   hooks:
-  #     - id: pytest-check
-  #       name: pytest
-  #       entry: pytest
-  #       language: system
-  #       pass_filenames: false
-  #       always_run: true
-  #       args: [--tb=short]
