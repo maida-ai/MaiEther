@@ -7,6 +7,7 @@ the Ether envelope that can be carried over in-memory calls, multiprocess
 queues, or binary transports.
 """
 
+from .attachment import Attachment
 from .errors import ConversionError, RegistrationError
 
-__all__ = ["ConversionError", "RegistrationError"]
+__all__ = ["Attachment", "ConversionError", "RegistrationError"]
