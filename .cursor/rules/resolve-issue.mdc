@@ -24,6 +24,26 @@ alwaysApply: false
     - Bulletlist should only include functional changes
     - Exceptions: Sometimes the issue is about tests or lint or imports, or other obvious things. In that case we should make sure we add it to change list
 
+**Tools**
+
+- You can run reduced coverage using this command
+  ```shell
+  poetry run pytest tests/<test file name> \
+    --cov=ether \
+    --cov-report=term-missing
+  ```
+- You can run complete coverage using this command.
+  This can help you identify if the coverage is needed by your tests
+  or if it was not covered in old tests
+  ```shell
+  poetry run pytest tests/ \
+    --cov=ether \
+    --cov-report=term-missing \
+    --strict-markers
+  ```
+
+
 **In rare occasions**
 - If there is a pre-requisite PR that you need to create before starting on resolving the issue, let the user know
 - Ask if you should create a prerequisite issue under `.issues/issue-XX-pre-YY.md`, where `YY` is another number
+- That should only happen if there is something required by the PR that is NOT part of the original issue.
