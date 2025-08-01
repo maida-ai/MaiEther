@@ -100,7 +100,7 @@ function get_subissues() {
 }
 
 
-function issue_to_markdown() {
+function issue_to_markdown_file() {
     # Check if gh is installed
     if ! command -v gh > /dev/null 2>&1; then
         echo "gh is not installed"
@@ -159,4 +159,12 @@ function issue_to_markdown() {
     echo "---" >> "$filename"
     echo "" >> "$filename"
     echo "[#${issue_number}](${issue_url})" >> "$filename"
+}
+
+function issue_to_markdown() {
+    # Converts all the issue numbers to markdown files
+    # Usage: issue_to_markdown <number> [<number> ...]
+    for issue_number in "$@"; do
+        issue_to_markdown_file "$issue_number"
+    done
 }
