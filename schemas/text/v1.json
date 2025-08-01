@@ -1,0 +1,145 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://maida.ai/schemas/text/v1.json",
+  "title": "Text v1 Schema",
+  "description": "Schema for text data transport in MaiEther",
+  "type": "object",
+  "required": ["kind", "schema_version", "payload"],
+  "properties": {
+    "kind": {
+      "type": "string",
+      "enum": ["text"],
+      "description": "Logical type identifier for text data"
+    },
+    "schema_version": {
+      "type": "integer",
+      "enum": [1],
+      "description": "Schema version number"
+    },
+    "payload": {
+      "type": "object",
+      "required": ["text"],
+      "properties": {
+        "text": {
+          "type": "string",
+          "description": "The text content"
+        }
+      },
+      "additionalProperties": false
+    },
+    "metadata": {
+      "type": "object",
+      "properties": {
+        "lang": {
+          "type": "string",
+          "description": "Language identifier (optional)"
+        },
+        "encoding": {
+          "type": "string",
+          "description": "Text encoding (optional)"
+        },
+        "detected_lang_conf": {
+          "type": "number",
+          "minimum": 0.0,
+          "maximum": 1.0,
+          "description": "Confidence score for detected language (optional)"
+        }
+      },
+      "additionalProperties": true
+    },
+    "extra_fields": {
+      "type": "object",
+      "description": "Carry-through for unclassified fields"
+    },
+    "attachments": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "media_type"],
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Unique identifier for the attachment"
+          },
+          "uri": {
+            "type": "string",
+            "description": "URI to the attachment data"
+          },
+          "inline_bytes": {
+            "type": "string",
+            "description": "Base64 encoded inline data"
+          },
+          "media_type": {
+            "type": "string",
+            "description": "MIME type of the attachment"
+          },
+          "codec": {
+            "type": "string",
+            "description": "Codec identifier"
+          },
+          "shape": {
+            "type": "array",
+            "items": {
+              "type": "integer"
+            },
+            "description": "Shape of tensor data"
+          },
+          "dtype": {
+            "type": "string",
+            "description": "Data type identifier"
+          },
+          "byte_order": {
+            "type": "string",
+            "enum": ["LE", "BE"],
+            "default": "LE",
+            "description": "Byte order for binary data"
+          },
+          "device": {
+            "type": "string",
+            "description": "Device identifier (e.g., cpu, cuda:0)"
+          },
+          "size_bytes": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Size in bytes"
+          },
+          "compression": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string",
+                "enum": ["zstd", "lz4", "none"]
+              },
+              "level": {
+                "type": "integer",
+                "minimum": 0
+              }
+            },
+            "required": ["name"]
+          },
+          "checksum": {
+            "type": "object",
+            "properties": {
+              "algo": {
+                "type": "string",
+                "enum": ["crc32c", "sha256"]
+              },
+              "value": {
+                "type": "string",
+                "pattern": "^[0-9a-fA-F]+$"
+              }
+            },
+            "required": ["algo", "value"]
+          },
+          "metadata": {
+            "type": "object",
+            "description": "Attachment-local metadata"
+          }
+        },
+        "additionalProperties": false
+      },
+      "description": "List of binary or external buffers"
+    }
+  },
+  "additionalProperties": false
+}
