@@ -10,6 +10,9 @@ This directory contains JSON Schema definitions for MaiEther data types.
 ### Tokens
 - [`tokens/v1.json`](tokens/v1.json) - Tokenized data transport schema (v1)
 
+### Embeddings
+- [`embedding/v1.json`](embedding/v1.json) - Embedding vector transport schema (v1)
+
 ## Schema Validation
 
 All schemas in this directory:
