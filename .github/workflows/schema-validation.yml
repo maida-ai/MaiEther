@@ -1,0 +1,61 @@
+name: Schema Validation
+
+on:
+  push:
+    branches: [ main, develop ]
+    paths:
+      - 'schemas/**'
+      - 'scripts/validate_schemas.py'
+      - '.github/workflows/schema-validation.yml'
+  pull_request:
+    branches: [ main, develop ]
+    paths:
+      - 'schemas/**'
+      - 'scripts/validate_schemas.py'
+      - '.github/workflows/schema-validation.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  # Cancel superseded runs on the same ref to save minutes
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate-schemas:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5  # Should complete well under 15s as per requirements
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install poetry
+        run: pipx install poetry
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: poetry
+          cache-dependency-path: '**/poetry.lock'
+
+      - name: Load cached venv
+        id: cached-poetry-dependencies
+        uses: actions/cache@v4
+        with:
+          path: .venv
+          key: venv-${{ runner.os }}-3.11-${{ hashFiles('**/poetry.lock') }}
+          restore-keys: |
+            venv-${{ runner.os }}-3.11-
+
+      - name: Install dependencies
+        if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
+        run: |
+          poetry install --only=main
+
+      - name: Validate schemas
+        run: |
+          poetry run python scripts/validate_schemas.py

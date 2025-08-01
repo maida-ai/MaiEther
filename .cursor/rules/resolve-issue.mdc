@@ -18,7 +18,7 @@ alwaysApply: false
 - One all the tests are done, create a file `.issues/commit-msg-XX.md` with a brief commit message with a bulletlist of changes that were introduced.
   - `XX` is the same as in the issue file name.
   - Commit message must have the following structure (split by blank lines) in GitHub markdown format:
-    - Start with the title (usually the same as in the issue description)
+    - Start with the title (usually the same as in the issue description). Make sure not to add the initial "#"
     - "Fixes #XX", where `XX` is the issue number
     - A brief description with motivation (ONLY if applicable)
     - Bullet list of changes
