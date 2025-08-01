@@ -36,6 +36,7 @@ Examples:
 from .attachment import Attachment
 from .core import Ether
 from .errors import ConversionError, RegistrationError
+from .kinds import TextModel
 from .spec import EtherSpec
 
 # Version information
@@ -48,4 +49,5 @@ __all__ = [
     "Ether",
     "EtherSpec",
     "RegistrationError",
+    "TextModel",
 ]
