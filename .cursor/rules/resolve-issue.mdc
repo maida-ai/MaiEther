@@ -2,8 +2,6 @@
 alwaysApply: false
 ---
 
-*If this rule invoked in chat, name the chat thread "Issue #XX Resolution"*
-
 **Task Rules**
 - Create a code change / PR to resolve an issue
 - The issue will be given to you either as a filename or `#XX` format

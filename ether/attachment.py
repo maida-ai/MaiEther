@@ -10,6 +10,7 @@ The Attachment class provides functionality for:
 - Tensor metadata (shape, dtype, device)
 - Compression and checksum support
 - Base64 serialization for JSON transport
+- NumPy array conversion with zero-copy support
 
 Examples:
     >>> from ether import Attachment
@@ -32,12 +33,24 @@ Examples:
     ...     shape=[1],
     ...     dtype="float32"
     ... )
+    >>>
+    >>> # NumPy array attachment
+    >>> import numpy as np
+    >>> arr = np.array([1.0, 2.0, 3.0], dtype=np.float32)
+    >>> att = Attachment.from_numpy(arr, id="emb-0")
 """
 
 import base64
 from typing import Any
 
 from pydantic import BaseModel, Field, field_serializer, field_validator
+
+try:
+    import numpy as np
+
+    NUMPY_AVAILABLE = True
+except ImportError:
+    NUMPY_AVAILABLE = False
 
 
 class Attachment(BaseModel):
@@ -157,3 +170,146 @@ class Attachment(BaseModel):
 
         if self.uri is None and self.inline_bytes is None:
             raise ValueError("Must specify either uri or inline_bytes")
+
+    @classmethod
+    def from_numpy(cls, array: "np.ndarray", *, id: str, uri: str | None = None) -> "Attachment":
+        """Create an Attachment from a NumPy array with zero-copy support.
+
+        Creates an attachment that can efficiently transport NumPy arrays without
+        unnecessary copying. The array data is stored as inline bytes or referenced
+        via URI, with proper metadata including shape, dtype, and size.
+
+        Args:
+            array: The NumPy array to convert to an attachment
+            id: Unique identifier for the attachment within the envelope
+            uri: Optional URI reference to external data (if provided, array data
+                 will not be stored inline)
+
+        Returns:
+            Attachment instance with array data and metadata
+
+        Raises:
+            ImportError: If NumPy is not available
+            ValueError: If array is not a valid NumPy array
+
+        Examples:
+            >>> import numpy as np
+            >>> arr = np.array([1.0, 2.0, 3.0], dtype=np.float32)
+            >>> att = Attachment.from_numpy(arr, id="emb-0")
+            >>> att.shape == [3]
+            True
+            >>> att.dtype == "float32"
+            True
+            >>> att.size_bytes == 12  # 3 * 4 bytes per float32
+            True
+        """
+        if not NUMPY_AVAILABLE:
+            raise ImportError("NumPy is required for from_numpy() method")
+
+        if not isinstance(array, np.ndarray):
+            raise ValueError("array must be a NumPy ndarray")
+
+        # Determine the codec based on dtype
+        dtype_to_codec = {
+            np.float32: "RAW_F32",
+            np.float64: "RAW_F64",
+            np.int32: "RAW_I32",
+            np.int64: "RAW_I64",
+            np.uint8: "RAW_U8",
+            np.uint16: "RAW_U16",
+            np.uint32: "RAW_U32",
+            np.uint64: "RAW_U64",
+            np.int8: "RAW_I8",
+            np.int16: "RAW_I16",
+        }
+
+        codec = dtype_to_codec.get(array.dtype.type)
+        if codec is None:
+            # For unsupported dtypes, use a generic codec
+            codec = "RAW_BYTES"
+
+        # Convert dtype to string representation
+        dtype_str = str(array.dtype)
+
+        # Get array shape and size
+        shape = list(array.shape)
+        size_bytes = int(array.nbytes)
+
+        # Handle zero-dimensional arrays
+        if len(shape) == 0:
+            # For zero-dimensional arrays, we need to handle them specially
+            shape = []
+
+        # Prepare attachment data
+        if uri is not None:
+            # Use URI reference (for zero-copy scenarios)
+            inline_bytes = None
+        else:
+            # Store data inline
+            inline_bytes = array.tobytes()
+
+        return cls(
+            id=id,
+            uri=uri,
+            inline_bytes=inline_bytes,
+            media_type="application/x-raw-tensor",
+            codec=codec,
+            shape=shape,
+            dtype=dtype_str,
+            size_bytes=size_bytes,
+            byte_order="LE",  # NumPy uses native byte order, typically LE
+        )
+
+    def to_numpy(self) -> "np.ndarray":
+        """Convert the attachment back to a NumPy array.
+
+        Reconstructs a NumPy array from the attachment's binary data and metadata.
+        This method requires the attachment to have inline_bytes or a valid URI
+        that can be accessed.
+
+        Returns:
+            NumPy array with the original shape, dtype, and data
+
+        Raises:
+            ImportError: If NumPy is not available
+            ValueError: If attachment cannot be converted to NumPy array
+            RuntimeError: If attachment uses URI reference (not yet supported)
+
+        Examples:
+            >>> import numpy as np
+            >>> arr = np.array([1.0, 2.0, 3.0], dtype=np.float32)
+            >>> att = Attachment.from_numpy(arr, id="emb-0")
+            >>> restored = att.to_numpy()
+            >>> np.array_equal(arr, restored)
+            True
+        """
+        if not NUMPY_AVAILABLE:
+            raise ImportError("NumPy is required for to_numpy() method")
+
+        if self.inline_bytes is None:
+            if self.uri is not None:
+                raise RuntimeError("URI-based attachments not yet supported for to_numpy()")
+            else:
+                raise ValueError("Attachment has no data to convert")
+
+        if self.shape is None or self.dtype is None:
+            raise ValueError("Attachment missing shape or dtype information")
+
+        # Convert string dtype back to NumPy dtype
+        try:
+            np_dtype = np.dtype(self.dtype)
+        except TypeError as e:
+            raise ValueError(f"Invalid dtype '{self.dtype}'") from e
+
+        # Reshape the bytes into the original array
+        try:
+            array = np.frombuffer(self.inline_bytes, dtype=np_dtype)
+
+            # Handle zero-dimensional arrays (empty shape list)
+            # We guranteed that the shape is not None earlier
+            if len(self.shape) == 0:
+                return np.array(array.item(), dtype=np_dtype).reshape(())
+            else:
+                return array.reshape(self.shape)
+        except ValueError as e:
+            raise ValueError("Failed to reconstruct array from attachment data") from e
