@@ -1,7 +1,6 @@
 """Tests for TextModel registration and conversion."""
 
 import json
-from pathlib import Path
 
 import pytest
 from jsonschema import Draft202012Validator
@@ -9,6 +8,7 @@ from pydantic import BaseModel, ValidationError
 
 from ether.core import Ether, _spec_registry
 from ether.kinds import TextModel
+from tests.kinds import SCHEMAS_DIR
 
 
 class TestTextModelRegistration:
@@ -204,7 +204,7 @@ class TestTextModelRegistration:
         _spec_registry[TextModel] = spec
 
         # Load the text.v1 schema
-        schema_path = Path(__file__).parent.parent.parent / "schemas" / "text" / "v1.json"
+        schema_path = SCHEMAS_DIR / "text" / "v1.json"
         with open(schema_path) as f:
             schema = json.load(f)
         validator = Draft202012Validator(schema)
@@ -330,7 +330,7 @@ class TestTextModelRegistration:
 
         # Test 3: The model produces envelopes that validate against the canonical schema
         # Note: The schema expects optional fields to be omitted, not set to null
-        schema_path = Path(__file__).parent.parent.parent / "schemas" / "text" / "v1.json"
+        schema_path = SCHEMAS_DIR / "text" / "v1.json"
         with open(schema_path) as f:
             schema = json.load(f)
         validator = Draft202012Validator(schema)

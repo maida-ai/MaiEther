@@ -1,9 +1,10 @@
 """Tests for JSON Schema validation."""
 
 import json
-from pathlib import Path
 
 from jsonschema import Draft202012Validator
+
+from tests.kinds import SCHEMAS_DIR
 
 
 class TestTextV1Schema:
@@ -11,7 +12,7 @@ class TestTextV1Schema:
 
     def setup_method(self) -> None:
         """Load the text.v1 schema."""
-        schema_path = Path(__file__).parent.parent / "schemas" / "text" / "v1.json"
+        schema_path = SCHEMAS_DIR / "text" / "v1.json"
         with open(schema_path) as f:
             self.schema = json.load(f)
         self.validator = Draft202012Validator(self.schema)
