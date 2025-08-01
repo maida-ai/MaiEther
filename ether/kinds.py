@@ -171,14 +171,14 @@ class TokenModel(BaseModel):
 
 @Ether.register(
     payload=["values", "dim"],
-    metadata=["source"],
+    metadata=["source", "norm", "quantized", "dtype", "codec"],
     extra_fields="ignore",
     kind="embedding",
 )
 class EmbeddingModel(BaseModel):
     """Embedding data model for transport via Ether envelopes.
 
-    Represents embedding vectors with dimensionality and optional source metadata.
+    Represents embedding vectors with dimensionality and comprehensive metadata.
     Follows the embedding.v1 schema specification (schemas/embedding/v1.json).
 
     This model is registered with Ether to enable conversion between EmbeddingModel
@@ -186,22 +186,31 @@ class EmbeddingModel(BaseModel):
     - values field -> Ether.payload.values
     - dim field -> Ether.payload.dim
     - source field -> Ether.metadata.source
+    - norm field -> Ether.metadata.norm
+    - quantized field -> Ether.metadata.quantized
+    - dtype field -> Ether.metadata.dtype
+    - codec field -> Ether.metadata.codec
 
     The resulting Ether envelope will have:
     - kind="embedding"
     - schema_version=1
     - payload={"values": None, "dim": ...}
-    - metadata={"source": "..."}
+    - metadata={"source": "...", "norm": ..., "quantized": ..., "dtype": ..., "codec": ...}
 
     The model ensures strict type compliance with the schema:
     - Required fields: dim (int)
-    - Optional fields: values (list[float] | None), source (string | None)
+    - Optional fields: values (list[float] | None), source (string | None),
+      norm (float | None), quantized (bool | None), dtype (string | None), codec (string | None)
     - Schema validation: Produces envelopes that validate against embedding.v1.json
 
     Args:
         values: Optional list of float values for the embedding vector
         dim: Dimensionality of the embedding vector (required)
         source: Optional source identifier for the embedding model
+        norm: Optional L2 norm of the embedding vector
+        quantized: Optional flag indicating if INT8/other codec is used
+        dtype: Optional data type (if values omitted, dtype must be in attachments)
+        codec: Optional codec identifier (RAW_F32|RAW_F16|INT8|DLPACK|ARROW_IPC, only if attachments provided)
 
     Examples:
         >>> # Basic embedding model with inline values
@@ -217,7 +226,15 @@ class EmbeddingModel(BaseModel):
         True
         >>>
         >>> # Embedding model with None values (for attachment-based transport)
-        >>> model = EmbeddingModel(values=None, dim=768, source="bert-base-uncased")
+        >>> model = EmbeddingModel(
+        ...     values=None,
+        ...     dim=768,
+        ...     source="bert-base-uncased",
+        ...     norm=1.0,
+        ...     quantized=False,
+        ...     dtype="float32",
+        ...     codec="RAW_F32"
+        ... )
         >>> ether = Ether.from_model(model)
         >>> ether.payload["values"] is None
         True
@@ -225,11 +242,26 @@ class EmbeddingModel(BaseModel):
         True
         >>> ether.metadata["source"] == "bert-base-uncased"
         True
+        >>> ether.metadata["norm"] == 1.0
+        True
+        >>> ether.metadata["quantized"] is False
+        True
+        >>> ether.metadata["dtype"] == "float32"
+        True
+        >>> ether.metadata["codec"] == "RAW_F32"
+        True
     """
 
     values: list[float] | None = Field(default=None, description="List of float values for the embedding vector")
     dim: int = Field(gt=0, description="Dimensionality of the embedding vector")
     source: str | None = Field(default=None, description="Source identifier for the embedding model")
+    norm: float | None = Field(default=None, ge=0.0, description="L2 norm of the embedding vector")
+    quantized: bool | None = Field(default=None, description="Flag indicating if INT8/other codec is used")
+    dtype: str | None = Field(default=None, description="Data type (if values omitted, dtype must be in attachments)")
+    codec: str | None = Field(
+        default=None,
+        description="Codec identifier (RAW_F32|RAW_F16|INT8|DLPACK|ARROW_IPC, only if attachments provided)",
+    )
 
     def model_post_init(self, __context: Any) -> None:
         """Validate embedding model after initialization.

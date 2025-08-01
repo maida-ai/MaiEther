@@ -50,6 +50,23 @@
         "source": {
           "type": "string",
           "description": "Source identifier for the embedding model"
+        },
+        "norm": {
+          "type": "number",
+          "minimum": 0.0,
+          "description": "L2 norm of the embedding vector"
+        },
+        "quantized": {
+          "type": "boolean",
+          "description": "Flag indicating if INT8/other codec is used"
+        },
+        "dtype": {
+          "type": "string",
+          "description": "Data type (if values omitted, dtype must be in attachments)"
+        },
+        "codec": {
+          "type": "string",
+          "description": "Codec identifier (RAW_F32|RAW_F16|INT8|DLPACK|ARROW_IPC, only if attachments provided)"
         }
       },
       "additionalProperties": true
