@@ -2,6 +2,8 @@
 alwaysApply: false
 ---
 
+*If this rule invoked in chat, name the chat thread "Issue #XX Resolution"*
+
 **Task Rules**
 - Create a code change / PR to resolve an issue
 - The issue will be given to you either as a filename or `#XX` format
@@ -15,13 +17,14 @@ alwaysApply: false
 - Once the code is written you must make sure it passes tests if applicable, as well as coverage
 - One all the tests are done, create a file `.issues/commit-msg-XX.md` with a brief commit message with a bulletlist of changes that were introduced.
   - `XX` is the same as in the issue file name.
-  - Commit message must have the following structure (split by blank lines):
+  - Commit message must have the following structure (split by blank lines) in GitHub markdown format:
     - Start with the title (usually the same as in the issue description)
     - "Fixes #XX", where `XX` is the issue number
     - A brief description with motivation (ONLY if applicable)
     - Bullet list of changes
   - The bulletlist should be very high level, and not longer than 3-4 items. It should exclude common-sense changes such as "Added tests" (this is required anyway), "Added to `__init__.py`" (this is often required), etc.
     - Bulletlist should only include functional changes
+    - Every bulletpoint must start with "-"
     - Exceptions: Sometimes the issue is about tests or lint or imports, or other obvious things. In that case we should make sure we add it to change list
 
 **Tools**
