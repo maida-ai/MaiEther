@@ -74,7 +74,10 @@ class TestNode:
         assert result is ether  # Should return the same object
         assert result.kind == "test"
         assert result.payload == {"data": "test"}
-        assert result.metadata == {"source": "test"}
+        # Metadata should contain both user-provided and auto-populated fields
+        assert result.metadata["source"] == "test"
+        assert "trace_id" in result.metadata
+        assert "created_at" in result.metadata
 
     def test_node_accepts_and_emits_can_be_modified(self) -> None:
         """Test that accepts and emits can be modified by subclasses."""

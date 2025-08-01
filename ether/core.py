@@ -27,6 +27,7 @@ Examples:
     True
 """
 
+import uuid
 from collections.abc import Callable, Mapping, Sequence
 from typing import Any, TypeVar
 
@@ -35,6 +36,7 @@ from pydantic import BaseModel, Field, PrivateAttr, ValidationError
 from .attachment import Attachment
 from .errors import ConversionError, RegistrationError
 from .spec import EtherSpec
+from .utils import rfc3339_now
 
 ModelT = TypeVar("ModelT", bound=BaseModel)
 
@@ -371,6 +373,20 @@ class Ether(BaseModel):
             self._source_model = eth._source_model
         else:
             super().__init__(*args, **kwargs)
+
+        # Auto-populate tracing metadata if not present
+        self._auto_populate_tracing_metadata()
+
+    def _auto_populate_tracing_metadata(self) -> None:
+        """Auto-populate tracing metadata if not present.
+
+        Sets trace_id and created_at in metadata if they are not already present.
+        """
+        if "trace_id" not in self.metadata:
+            self.metadata["trace_id"] = str(uuid.uuid4())
+
+        if "created_at" not in self.metadata:
+            self.metadata["created_at"] = rfc3339_now()
 
     def as_model(self, target_model: type[ModelT], *, require_kind: bool = False) -> ModelT:
         """Convert the Ether envelope to a registered Pydantic model.

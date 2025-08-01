@@ -23,7 +23,10 @@ class TestEtherSummary:
         assert summary["kind"] == "embedding"
         assert summary["schema_version"] == 1
         assert summary["payload_keys"] == ["dim"]
-        assert summary["metadata_keys"] == ["source"]
+        # Metadata keys should include both user-provided and auto-populated fields
+        assert "source" in summary["metadata_keys"]
+        assert "trace_id" in summary["metadata_keys"]
+        assert "created_at" in summary["metadata_keys"]
         assert summary["extra_keys"] == []
         assert summary["attachments"] == []
         assert summary["source_model"] is None
@@ -39,7 +42,11 @@ class TestEtherSummary:
         summary = ether.summary()
 
         assert summary["payload_keys"] == ["vec.dim", "vec.values"]
-        assert summary["metadata_keys"] == ["model.name", "model.version"]
+        # Metadata keys should include both user-provided and auto-populated fields
+        assert "model.name" in summary["metadata_keys"]
+        assert "model.version" in summary["metadata_keys"]
+        assert "trace_id" in summary["metadata_keys"]
+        assert "created_at" in summary["metadata_keys"]
 
     def test_summary_with_attachments(self) -> None:
         """Test summary with attachments."""
@@ -101,7 +108,10 @@ class TestEtherSummary:
         assert summary["kind"] == "embedding"
         assert summary["schema_version"] == 1
         assert summary["payload_keys"] == ["embedding"]
-        assert summary["metadata_keys"] == ["source"]
+        # Metadata keys should include both user-provided and auto-populated fields
+        assert "source" in summary["metadata_keys"]
+        assert "trace_id" in summary["metadata_keys"]
+        assert "created_at" in summary["metadata_keys"]
         assert summary["extra_keys"] == []
         assert summary["attachments"] == []
 
@@ -126,5 +136,10 @@ class TestEtherSummary:
             "data.features.embeddings",
             "data.features.metadata.dim",
         ]
-        assert summary["metadata_keys"] == ["processing.steps", "provenance.source", "provenance.timestamp"]
+        # Metadata keys should include both user-provided and auto-populated fields
+        assert "processing.steps" in summary["metadata_keys"]
+        assert "provenance.source" in summary["metadata_keys"]
+        assert "provenance.timestamp" in summary["metadata_keys"]
+        assert "trace_id" in summary["metadata_keys"]
+        assert "created_at" in summary["metadata_keys"]
         assert summary["extra_keys"] == ["debug", "version"]

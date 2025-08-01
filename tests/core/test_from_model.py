@@ -38,7 +38,10 @@ class TestEtherFromModel:
         assert ether.kind == "embedding"
         assert ether.schema_version == 1
         assert ether.payload == {"vec": {"values": [1.0, 2.0, 3.0], "dim": 3}}
-        assert ether.metadata == {"source": "bert"}
+        # Metadata should contain both user-provided and auto-populated fields
+        assert ether.metadata["source"] == "bert"
+        assert "trace_id" in ether.metadata
+        assert "created_at" in ether.metadata
         assert ether.extra_fields == {"note": "test"}
         assert ether._source_model == FooModel
 
@@ -153,7 +156,10 @@ class TestEtherFromModel:
         ether = Ether.from_model(model)
 
         assert ether.payload == {"vec": {"values": [1.0, 2.0]}}
-        assert ether.metadata == {"model": {"source": "bert"}}
+        # Metadata should contain both user-provided and auto-populated fields
+        assert ether.metadata["model"] == {"source": "bert"}
+        assert "trace_id" in ether.metadata
+        assert "created_at" in ether.metadata
 
     def test_from_model_without_kind(self) -> None:
         """Test from_model with model registered without kind."""

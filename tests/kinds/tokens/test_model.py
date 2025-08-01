@@ -73,7 +73,12 @@ class TestTokenModelRegistration:
         assert ether.kind == "tokens"
         assert ether.schema_version == 1
         assert ether.payload == {"ids": [1, 2, 3, 4, 5], "mask": [1, 1, 1, 1, 1]}
-        assert ether.metadata == {"vocab": "gpt2", "truncation": "longest_first", "offsets": True}
+        # Metadata should contain both user-provided and auto-populated fields
+        assert ether.metadata["vocab"] == "gpt2"
+        assert ether.metadata["truncation"] == "longest_first"
+        assert ether.metadata["offsets"] is True
+        assert "trace_id" in ether.metadata
+        assert "created_at" in ether.metadata
         assert ether.extra_fields == {}
         assert ether._source_model == TokenModel
 
@@ -113,8 +118,12 @@ class TestTokenModelRegistration:
         # Verify Ether properties
         assert ether.kind == "tokens"
         assert ether.payload == {"ids": [1, 2, 3], "mask": None}
-        # Metadata includes None values for optional fields
-        assert ether.metadata == {"vocab": "bert-base-uncased", "truncation": None, "offsets": None}
+        # Metadata should contain both user-provided and auto-populated fields
+        assert ether.metadata["vocab"] == "bert-base-uncased"
+        assert ether.metadata["truncation"] is None
+        assert ether.metadata["offsets"] is None
+        assert "trace_id" in ether.metadata
+        assert "created_at" in ether.metadata
 
         # Convert back to TokenModel
         converted_model = ether.as_model(TokenModel)
@@ -150,8 +159,12 @@ class TestTokenModelRegistration:
         # Verify conversion
         assert ether.kind == "tokens"
         assert ether.payload == {"ids": [1, 2, 3], "mask": None}
-        # Metadata includes None values for optional fields
-        assert ether.metadata == {"vocab": "gpt2", "truncation": "longest_first", "offsets": None}
+        # Metadata should contain both user-provided and auto-populated fields
+        assert ether.metadata["vocab"] == "gpt2"
+        assert ether.metadata["truncation"] == "longest_first"
+        assert ether.metadata["offsets"] is None
+        assert "trace_id" in ether.metadata
+        assert "created_at" in ether.metadata
 
     def test_token_model_require_kind_validation(self) -> None:
         """Test require_kind validation with TokenModel."""
@@ -312,7 +325,12 @@ class TestTokenModelRegistration:
         assert "vocab" in ether.metadata
         assert "truncation" in ether.metadata
         assert "offsets" in ether.metadata
-        assert len(ether.metadata) == 3  # Only the three fields
+        # Metadata should contain both user-provided and auto-populated fields
+        assert "vocab" in ether.metadata
+        assert "truncation" in ether.metadata
+        assert "offsets" in ether.metadata
+        assert "trace_id" in ether.metadata
+        assert "created_at" in ether.metadata
 
     def test_token_model_binding_mechanism_compliance(self) -> None:
         """Test that TokenModel follows the binding mechanism matrix requirements."""

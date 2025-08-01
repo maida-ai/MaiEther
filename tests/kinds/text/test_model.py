@@ -69,7 +69,12 @@ class TestTextModelRegistration:
         assert ether.kind == "text"
         assert ether.schema_version == 1
         assert ether.payload == {"text": "Hello, world!"}
-        assert ether.metadata == {"lang": "en", "encoding": "utf-8", "detected_lang_conf": 0.95}
+        # Metadata should contain both user-provided and auto-populated fields
+        assert ether.metadata["lang"] == "en"
+        assert ether.metadata["encoding"] == "utf-8"
+        assert ether.metadata["detected_lang_conf"] == 0.95
+        assert "trace_id" in ether.metadata
+        assert "created_at" in ether.metadata
         assert ether.extra_fields == {}
         assert ether._source_model == TextModel
 
@@ -109,8 +114,12 @@ class TestTextModelRegistration:
         # Verify Ether properties
         assert ether.kind == "text"
         assert ether.payload == {"text": "Minimal text"}
-        # Metadata includes None values for optional fields
-        assert ether.metadata == {"lang": None, "encoding": None, "detected_lang_conf": None}
+        # Metadata should contain both user-provided and auto-populated fields
+        assert ether.metadata["lang"] is None
+        assert ether.metadata["encoding"] is None
+        assert ether.metadata["detected_lang_conf"] is None
+        assert "trace_id" in ether.metadata
+        assert "created_at" in ether.metadata
 
         # Convert back to TextModel
         converted_model = ether.as_model(TextModel)
@@ -146,8 +155,12 @@ class TestTextModelRegistration:
         # Verify conversion
         assert ether.kind == "text"
         assert ether.payload == {"text": "Constructor test"}
-        # Metadata includes None values for optional fields
-        assert ether.metadata == {"lang": "en", "encoding": None, "detected_lang_conf": None}
+        # Metadata should contain both user-provided and auto-populated fields
+        assert ether.metadata["lang"] == "en"
+        assert ether.metadata["encoding"] is None
+        assert ether.metadata["detected_lang_conf"] is None
+        assert "trace_id" in ether.metadata
+        assert "created_at" in ether.metadata
 
     def test_text_model_require_kind_validation(self) -> None:
         """Test require_kind validation with TextModel."""
@@ -297,7 +310,12 @@ class TestTextModelRegistration:
         assert "lang" in ether.metadata
         assert "encoding" in ether.metadata
         assert "detected_lang_conf" in ether.metadata
-        assert len(ether.metadata) == 3  # Only the three optional fields
+        # Metadata should contain both user-provided and auto-populated fields
+        assert "lang" in ether.metadata
+        assert "encoding" in ether.metadata
+        assert "detected_lang_conf" in ether.metadata
+        assert "trace_id" in ether.metadata
+        assert "created_at" in ether.metadata
 
     def test_text_model_binding_mechanism_compliance(self) -> None:
         """Test that TextModel follows the binding mechanism matrix requirements."""
