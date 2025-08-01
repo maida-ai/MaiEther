@@ -1,0 +1,15 @@
+{
+  "kind": "tokens",
+  "schema_version": 1,
+  "payload": {
+    "ids": [101, 2023, 1010, 2088, 1029, 102],
+    "mask": [1, 1, 1, 1, 1, 1]
+  },
+  "metadata": {
+    "vocab": "bert-base-uncased",
+    "truncation": "longest_first",
+    "offsets": false
+  },
+  "extra_fields": {},
+  "attachments": []
+}

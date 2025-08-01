@@ -1,0 +1,14 @@
+{
+  "kind": "text",
+  "schema_version": 1,
+  "payload": {
+    "text": "Hello, world! This is a test message for the golden fixture."
+  },
+  "metadata": {
+    "lang": "en",
+    "encoding": "utf-8",
+    "detected_lang_conf": 0.95
+  },
+  "extra_fields": {},
+  "attachments": []
+}

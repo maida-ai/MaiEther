@@ -1,0 +1,16 @@
+{
+  "kind": "embedding",
+  "schema_version": 1,
+  "payload": {
+    "values": [0.1, 0.2, 0.3, 0.4, 0.5],
+    "dim": 5
+  },
+  "metadata": {
+    "source": "test-embedding-model",
+    "norm": 0.74,
+    "quantized": false,
+    "dtype": "float32"
+  },
+  "extra_fields": {},
+  "attachments": []
+}
