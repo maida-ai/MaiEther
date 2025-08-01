@@ -10,13 +10,15 @@ tokens, etc.
 
 Where applicable, the models follow the binding mechanism matrix:
 
-| Canonical JSON-Schema file  | Matching edge model    | Binding mechanism                      |
-| --------------------------- | ---------------------- | -------------------------------------- |
-| schemas/text/v1.json        | TextModel (Pydantic)   | @Ether.register(..., kind="text")      |
-| schemas/tokens/v1.json      | TokenModel (Pydantic)  | @Ether.register(..., kind="tokens")    |
-| TBD                         | TBD (Pydantic)         | @Ether.register(..., kind="tbd")       |
+| Canonical JSON-Schema file  | Matching edge model       | Binding mechanism                      |
+| --------------------------- | ------------------------- | -------------------------------------- |
+| schemas/text/v1.json        | TextModel (Pydantic)      | @Ether.register(..., kind="text")      |
+| schemas/tokens/v1.json      | TokenModel (Pydantic)     | @Ether.register(..., kind="tokens")    |
+| schemas/embedding/v1.json   | EmbeddingModel (Pydantic) | @Ether.register(..., kind="embedding") |
 
 """
+
+from typing import Any
 
 from pydantic import BaseModel, Field
 
@@ -165,3 +167,77 @@ class TokenModel(BaseModel):
     vocab: str = Field(description="Vocabulary/model identifier")
     truncation: str | None = Field(default=None, description="Truncation strategy used")
     offsets: bool | None = Field(default=None, description="Whether character offsets are included")
+
+
+@Ether.register(
+    payload=["values", "dim"],
+    metadata=["source"],
+    extra_fields="ignore",
+    kind="embedding",
+)
+class EmbeddingModel(BaseModel):
+    """Embedding data model for transport via Ether envelopes.
+
+    Represents embedding vectors with dimensionality and optional source metadata.
+    Follows the embedding.v1 schema specification (schemas/embedding/v1.json).
+
+    This model is registered with Ether to enable conversion between EmbeddingModel
+    instances and Ether envelopes. The registration maps:
+    - values field -> Ether.payload.values
+    - dim field -> Ether.payload.dim
+    - source field -> Ether.metadata.source
+
+    The resulting Ether envelope will have:
+    - kind="embedding"
+    - schema_version=1
+    - payload={"values": None, "dim": ...}
+    - metadata={"source": "..."}
+
+    The model ensures strict type compliance with the schema:
+    - Required fields: dim (int)
+    - Optional fields: values (list[float] | None), source (string | None)
+    - Schema validation: Produces envelopes that validate against embedding.v1.json
+
+    Args:
+        values: Optional list of float values for the embedding vector
+        dim: Dimensionality of the embedding vector (required)
+        source: Optional source identifier for the embedding model
+
+    Examples:
+        >>> # Basic embedding model with inline values
+        >>> model = EmbeddingModel(values=[1.0, 2.0, 3.0], dim=3)
+        >>> ether = Ether.from_model(model)
+        >>> ether.kind == "embedding"
+        True
+        >>> ether.schema_version == 1
+        True
+        >>> ether.payload["values"] == [1.0, 2.0, 3.0]
+        True
+        >>> ether.payload["dim"] == 3
+        True
+        >>>
+        >>> # Embedding model with None values (for attachment-based transport)
+        >>> model = EmbeddingModel(values=None, dim=768, source="bert-base-uncased")
+        >>> ether = Ether.from_model(model)
+        >>> ether.payload["values"] is None
+        True
+        >>> ether.payload["dim"] == 768
+        True
+        >>> ether.metadata["source"] == "bert-base-uncased"
+        True
+    """
+
+    values: list[float] | None = Field(default=None, description="List of float values for the embedding vector")
+    dim: int = Field(gt=0, description="Dimensionality of the embedding vector")
+    source: str | None = Field(default=None, description="Source identifier for the embedding model")
+
+    def model_post_init(self, __context: Any) -> None:
+        """Validate embedding model after initialization.
+
+        Ensures that if values is provided, its length matches dim.
+
+        Raises:
+            ValueError: If values length doesn't match dim when values is provided
+        """
+        if self.values is not None and len(self.values) != self.dim:
+            raise ValueError(f"Values length ({len(self.values)}) must match dim ({self.dim})")

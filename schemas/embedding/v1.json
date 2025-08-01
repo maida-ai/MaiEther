@@ -20,6 +20,22 @@
       "type": "object",
       "required": ["dim"],
       "properties": {
+        "values": {
+          "oneOf": [
+            {
+              "type": "array",
+              "items": {
+                "type": "number"
+              },
+              "description": "List of float values for the embedding vector"
+            },
+            {
+              "type": "null",
+              "description": "Null when using attachment-based transport"
+            }
+          ],
+          "description": "List of float values for the embedding vector or null for attachment-based transport"
+        },
         "dim": {
           "type": "integer",
           "minimum": 1,
