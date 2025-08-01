@@ -7,6 +7,9 @@ This directory contains JSON Schema definitions for MaiEther data types.
 ### Text
 - [`text/v1.json`](text/v1.json) - Text data transport schema (v1)
 
+### Tokens
+- [`tokens/v1.json`](tokens/v1.json) - Tokenized data transport schema (v1)
+
 ## Schema Validation
 
 All schemas in this directory:
