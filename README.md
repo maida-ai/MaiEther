@@ -1,7 +1,7 @@
 # MaiEther
 
 [![codecov](https://codecov.io/github/maida-ai/MaiEther/graph/badge.svg)](https://codecov.io/github/maida-ai/MaiEther)
-[![unittests](https://github.com/maida-ai/MaiEther/actions/workflows/tests.yml/badge.svg)](https://github.com/maida-ai/MaiEther/actions/workflows/tests.yml)
+[![unittests](https://github.com/maida-ai/MaiEther/actions/workflows/unittests.yml/badge.svg)](https://github.com/maida-ai/MaiEther/actions/workflows/unittests.yml)
 [![documentation](https://github.com/maida-ai/MaiEther/actions/workflows/sphinx-docs.yml/badge.svg)](https://github.com/maida-ai/MaiEther/actions/workflows/sphinx-docs.yml)
 
 
