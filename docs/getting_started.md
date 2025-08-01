@@ -361,6 +361,8 @@ summary = ether.summary()
 print(f"Ether summary: {summary}")
 ```
 
+**Important Note on Timestamps**: The `created_at` and lineage timestamps are **advisory** and should not be used for causal ordering, especially when envelopes travel across hosts. Clock skew between machines can cause timestamps to appear out of order even when events occurred in the correct sequence. For causal ordering, use the `trace_id` and `span_id` fields for distributed tracing instead.
+
 ## Schema Registry
 
 MaiEther maintains a schema registry for validation and documentation. Each canonical kind has:

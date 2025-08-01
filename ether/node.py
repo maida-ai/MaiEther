@@ -9,6 +9,7 @@ Ether envelopes with specific kind and version requirements.
 """
 
 from .core import Ether
+from .utils import rfc3339_now
 
 
 class Node:
@@ -54,3 +55,20 @@ class Node:
             NotImplementedError: This method must be overridden by subclasses
         """
         raise NotImplementedError(f"Node {self.__class__.__name__} must override process() method")
+
+    def append_lineage(self, eth: Ether) -> None:
+        """Append lineage information to the Ether envelope metadata.
+
+        Adds a lineage entry to the Ether's metadata containing the node's
+        name, version, and current timestamp. Creates the lineage list if
+        it doesn't exist.
+
+        Args:
+            eth: The Ether envelope to append lineage information to
+        """
+        if "lineage" not in eth.metadata:
+            eth.metadata["lineage"] = []
+
+        lineage_entry = {"node": self.name, "version": self.version, "ts": rfc3339_now()}
+
+        eth.metadata["lineage"].append(lineage_entry)

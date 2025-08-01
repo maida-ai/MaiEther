@@ -93,6 +93,8 @@
 * `trace_id`, `span_id`, `created_at`, `producer`, `lineage`
 * `schema_namespace` (optional string to disambiguate `kind` across silos)
 
+**Note on Timestamps**: The `created_at` and lineage `ts` fields are **advisory** and should not be used for causal ordering, especially when envelopes travel across hosts. Clock skew between machines can cause timestamps to appear out of order even when events occurred in the correct sequence. For causal ordering, use the `trace_id` and `span_id` fields for distributed tracing instead.
+
 **Versioning:**
 
 * `schema_version` follows **semantic evolution**:
@@ -553,6 +555,7 @@ message EtherProto {
 
   * Nodes should assert they produce one of their declared `(kind,version)` tuples.
   * Attach `trace_id`, `span_id`, `lineage` (append `{node, version, ts}`) in `metadata`.
+  * **Note**: Lineage timestamps are advisory and may not reflect causal ordering due to clock skew across hosts.
 
 * **Logging/metrics**:
 

@@ -70,7 +70,10 @@ class TestEmbeddingModelRegistration:
         assert ether.kind == "embedding"
         assert ether.schema_version == 1
         assert ether.payload == {"values": [1.0, 2.0, 3.0], "dim": 3}
-        assert ether.metadata == {"source": "test-model"}
+        # Metadata should contain both user-provided and auto-populated fields
+        assert ether.metadata["source"] == "test-model"
+        assert "trace_id" in ether.metadata
+        assert "created_at" in ether.metadata
         assert ether.extra_fields == {}
         assert ether._source_model == EmbeddingModel
 
@@ -109,7 +112,10 @@ class TestEmbeddingModelRegistration:
         # Verify Ether properties
         assert ether.kind == "embedding"
         assert ether.payload == {"values": None, "dim": 768}
-        assert ether.metadata == {"source": "bert-base-uncased"}
+        # Metadata should contain both user-provided and auto-populated fields
+        assert ether.metadata["source"] == "bert-base-uncased"
+        assert "trace_id" in ether.metadata
+        assert "created_at" in ether.metadata
 
         # Convert back to EmbeddingModel
         converted_model = ether.as_model(EmbeddingModel)
@@ -146,8 +152,10 @@ class TestEmbeddingModelRegistration:
         # Verify Ether properties
         assert ether.kind == "embedding"
         assert ether.payload == {"values": None, "dim": 512}
-        # Metadata includes None values for optional fields
-        assert ether.metadata == {"source": None}
+        # Metadata should contain both user-provided and auto-populated fields
+        assert ether.metadata["source"] is None
+        assert "trace_id" in ether.metadata
+        assert "created_at" in ether.metadata
 
         # Convert back to EmbeddingModel
         converted_model = ether.as_model(EmbeddingModel)
@@ -182,8 +190,10 @@ class TestEmbeddingModelRegistration:
         # Verify conversion
         assert ether.kind == "embedding"
         assert ether.payload == {"values": [1.0, 2.0], "dim": 2}
-        # Metadata includes None values for optional fields
-        assert ether.metadata == {"source": "test"}
+        # Metadata should contain both user-provided and auto-populated fields
+        assert ether.metadata["source"] == "test"
+        assert "trace_id" in ether.metadata
+        assert "created_at" in ether.metadata
 
     def test_embedding_model_require_kind_validation(self) -> None:
         """Test require_kind validation with EmbeddingModel."""
@@ -323,7 +333,10 @@ class TestEmbeddingModelRegistration:
 
         # Test 7: Metadata must contain exactly the optional fields (even if None)
         assert "source" in ether.metadata
-        assert len(ether.metadata) == 1  # Only the source field
+        # Metadata should contain both user-provided and auto-populated fields
+        assert "source" in ether.metadata
+        assert "trace_id" in ether.metadata
+        assert "created_at" in ether.metadata
 
     def test_embedding_model_binding_mechanism_compliance(self) -> None:
         """Test that EmbeddingModel follows the binding mechanism matrix requirements."""
@@ -567,7 +580,10 @@ class TestEmbeddingModelWithAttachments:
         # Verify Ether properties
         assert ether.kind == "embedding"
         assert ether.payload == {"values": None, "dim": 768}
-        assert ether.metadata == {"source": "bert-base-uncased"}
+        # Metadata should contain both user-provided and auto-populated fields
+        assert ether.metadata["source"] == "bert-base-uncased"
+        assert "trace_id" in ether.metadata
+        assert "created_at" in ether.metadata
         assert len(ether.attachments) == 1
         assert ether.attachments[0].id == "embedding-0"
         assert ether.attachments[0].codec == "RAW_F32"
@@ -609,7 +625,10 @@ class TestEmbeddingModelWithAttachments:
         # Verify Ether properties
         assert ether.kind == "embedding"
         assert ether.payload == {"values": original_values, "dim": 5}
-        assert ether.metadata == {"source": "test-model"}
+        # Metadata should contain both user-provided and auto-populated fields
+        assert ether.metadata["source"] == "test-model"
+        assert "trace_id" in ether.metadata
+        assert "created_at" in ether.metadata
 
         # Convert back to EmbeddingModel
         converted_model = ether.as_model(EmbeddingModel)

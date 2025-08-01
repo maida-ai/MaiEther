@@ -22,7 +22,9 @@ class TestEtherCreation:
         assert ether.kind == "embedding"
         assert ether.schema_version == 1
         assert ether.payload == {}
-        assert ether.metadata == {}
+        # Metadata should contain auto-populated tracing fields
+        assert "trace_id" in ether.metadata
+        assert "created_at" in ether.metadata
         assert ether.extra_fields == {}
         assert ether.attachments == []
 
@@ -37,7 +39,10 @@ class TestEtherCreation:
         assert ether.kind == "tokens"
         assert ether.schema_version == 1  # default value
         assert ether.payload == {"ids": [1, 2, 3]}
-        assert ether.metadata == {"vocab": "bert-base"}
+        # Metadata should contain both user-provided and auto-populated fields
+        assert ether.metadata["vocab"] == "bert-base"
+        assert "trace_id" in ether.metadata
+        assert "created_at" in ether.metadata
 
     def test_create_ether_with_attachments(self) -> None:
         """Test creating an Ether with attachments."""
@@ -83,7 +88,10 @@ class TestEtherCreation:
         )
 
         assert ether.payload == {"vec": {"values": [1.0, 2.0, 3.0], "dim": 3}}
-        assert ether.metadata == {"model": {"name": "bert-base", "version": "1.0"}}
+        # Metadata should contain both user-provided and auto-populated fields
+        assert ether.metadata["model"] == {"name": "bert-base", "version": "1.0"}
+        assert "trace_id" in ether.metadata
+        assert "created_at" in ether.metadata
 
 
 class TestEtherValidation:
