@@ -38,17 +38,23 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Check if docs directory exists
+      - name: Check if docs directory and conf.py exist
         id: check-docs
         shell: bash
         run: |
           set -euo pipefail
-          if [ -d "docs" ]; then
+          if [ -d "docs" ] && [ -f "docs/conf.py" ]; then
             echo "exists=true" >> "$GITHUB_OUTPUT"
-            echo "docs directory exists"
+            echo "docs directory and conf.py exist"
           else
             echo "exists=false" >> "$GITHUB_OUTPUT"
-            echo "docs directory does not exist, skipping documentation build"
+            if [ ! -d "docs" ]; then
+              echo "docs directory does not exist"
+            fi
+            if [ ! -f "docs/conf.py" ]; then
+              echo "docs/conf.py file does not exist"
+            fi
+            echo "skipping documentation build"
           fi
 
   build:

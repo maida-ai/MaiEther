@@ -104,8 +104,9 @@
 
 Focus on the common IRs to start:
 
-#### `embedding.v1`
+#### `embedding.v1` (implemented)
 
+<!--
 * **payload**:
   * `values`: `list[float]` *or* an **attachment** (preferred for large vectors)
   * `dim`: `int` (MUST = len(values) if values present)
@@ -117,9 +118,16 @@ Focus on the common IRs to start:
   * `codec`: `RAW_F32|RAW_F16|INT8|DLPACK|ARROW_IPC`? (only if attachements is provided)
 * **attachments** (optional, recommended for large):
   * Single attachment with `codec` = `RAW_F32|RAW_F16|INT8|DLPACK|ARROW_IPC` and tensor descriptors.
+-->
+- **Purpose**: Transport embedding vectors with metadata
+- **Payload**: `values` (list[float] or null), `dim` (int)
+- **Metadata**: `source`, `norm`, `quantized`, `dtype`, `codec`
+- **Attachments**: Single attachment with tensor data (preferred for large vectors)
+- **Schema**: [embedding/v1.json](schemas/embedding/v1.json)
 
-#### `tokens.v1`
+#### `tokens.v1` (implemented)
 
+<!--
 * **payload**:
   * `ids`: `list[int]`
   * `mask`: `list[int]?` (same length as `ids`)
@@ -127,15 +135,26 @@ Focus on the common IRs to start:
   * `vocab`: `str` (vocabulary/model)
   * `truncation`: `str?`
   * `offsets`: `bool?`
+-->
+- **Purpose**: Transport tokenized data with vocabulary information
+- **Payload**: `ids` (list[int]), `mask` (list[int]?)
+- **Metadata**: `vocab` (required), `truncation`, `offsets`
+- **Schema**: [tokens/v1.json](schemas/tokens/v1.json)
 
-#### `text.v1`
+#### `text.v1` (implemented)
 
+<!--
 * **payload**:
   * `text`: `str`
 * **metadata**:
-  * `lang`: `str?`,
-  `encoding`: `str?`,
-  `detected_lang_conf`: `float?`
+  * `lang`: `str?`
+  * `encoding`: `str?`
+  * `detected_lang_conf`: `float?`
+-->
+- **Purpose**: Transport text content with language metadata
+- **Payload**: `text` (string)
+- **Metadata**: `lang`, `encoding`, `detected_lang_conf`
+- **Schema**: [text/v1.json](schemas/text/v1.json)
 
 #### `image.v1`
 
