@@ -5,13 +5,13 @@ repos:
     hooks:
       - id: char-cleanup
         name: Special character cleanup
-        entry: hooks/char_cleanup.py
+        entry: scripts/char_cleanup.py
         language: python
         # files: .*\.(py|md)
         # types_or: [text, python]
         files: .*\.md$
         types_or: [text]
-        exclude: ^hooks/
+        exclude: ^scripts/
         pass_filenames: true
 
       - id: pytest-check-fast
