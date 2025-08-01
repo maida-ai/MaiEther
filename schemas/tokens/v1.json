@@ -1,0 +1,154 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://maida.ai/schemas/tokens/v1.json",
+  "title": "Tokens v1 Schema",
+  "description": "Schema for tokenized data transport in MaiEther",
+  "type": "object",
+  "required": ["kind", "schema_version", "payload"],
+  "properties": {
+    "kind": {
+      "type": "string",
+      "enum": ["tokens"],
+      "description": "Logical type identifier for tokenized data"
+    },
+    "schema_version": {
+      "type": "integer",
+      "enum": [1],
+      "description": "Schema version number"
+    },
+    "payload": {
+      "type": "object",
+      "required": ["ids"],
+      "properties": {
+        "ids": {
+          "type": "array",
+          "items": {
+            "type": "integer"
+          },
+          "description": "List of token IDs"
+        },
+        "mask": {
+          "type": "array",
+          "items": {
+            "type": "integer"
+          },
+          "description": "Attention mask (same length as ids)"
+        }
+      },
+      "additionalProperties": false
+    },
+    "metadata": {
+      "type": "object",
+      "required": ["vocab"],
+      "properties": {
+        "vocab": {
+          "type": "string",
+          "description": "Vocabulary/model identifier"
+        },
+        "truncation": {
+          "type": "string",
+          "description": "Truncation strategy used"
+        },
+        "offsets": {
+          "type": "boolean",
+          "description": "Whether character offsets are included"
+        }
+      },
+      "additionalProperties": true
+    },
+    "extra_fields": {
+      "type": "object",
+      "description": "Carry-through for unclassified fields"
+    },
+    "attachments": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "media_type"],
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Unique identifier for the attachment"
+          },
+          "uri": {
+            "type": "string",
+            "description": "URI to the attachment data"
+          },
+          "inline_bytes": {
+            "type": "string",
+            "description": "Base64 encoded inline data"
+          },
+          "media_type": {
+            "type": "string",
+            "description": "MIME type of the attachment"
+          },
+          "codec": {
+            "type": "string",
+            "description": "Codec identifier"
+          },
+          "shape": {
+            "type": "array",
+            "items": {
+              "type": "integer"
+            },
+            "description": "Shape of tensor data"
+          },
+          "dtype": {
+            "type": "string",
+            "description": "Data type identifier"
+          },
+          "byte_order": {
+            "type": "string",
+            "enum": ["LE", "BE"],
+            "default": "LE",
+            "description": "Byte order for binary data"
+          },
+          "device": {
+            "type": "string",
+            "description": "Device identifier (e.g., cpu, cuda:0)"
+          },
+          "size_bytes": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Size in bytes"
+          },
+          "compression": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string",
+                "enum": ["zstd", "lz4", "none"]
+              },
+              "level": {
+                "type": "integer",
+                "minimum": 0
+              }
+            },
+            "required": ["name"]
+          },
+          "checksum": {
+            "type": "object",
+            "properties": {
+              "algo": {
+                "type": "string",
+                "enum": ["crc32c", "sha256"]
+              },
+              "value": {
+                "type": "string",
+                "pattern": "^[0-9a-fA-F]+$"
+              }
+            },
+            "required": ["algo", "value"]
+          },
+          "metadata": {
+            "type": "object",
+            "description": "Attachment-local metadata"
+          }
+        },
+        "additionalProperties": false
+      },
+      "description": "List of binary or external buffers"
+    }
+  },
+  "additionalProperties": false
+}

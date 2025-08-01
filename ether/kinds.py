@@ -40,9 +40,14 @@ class TextModel(BaseModel):
     - metadata={"lang": "...", "encoding": "...", "detected_lang_conf": ...}
 
     **Binding Mechanism Compliance:**
+
     This model follows the binding mechanism matrix:
-    | Canonical JSON-Schema file  | Matching edge model    | Binding mechanism                        |
+
+    | Canonical JSON-Schema file  | Matching edge model    | Binding mechanism                      |
+    | --------------------------- | ---------------------- | -------------------------------------- |
     | schemas/text/v1.json        | TextModel (Pydantic)   | @Ether.register(..., kind="text")      |
+    | schemas/tokens/v1.json      | TBD (Pydantic)         | @Ether.register(..., kind="tokens")    |
+    | TBD                         | TBD (Pydantic)         | @Ether.register(..., kind="embedding") |
 
     The model ensures strict type compliance with the schema:
     - Required fields: text (string)
