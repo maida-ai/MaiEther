@@ -112,12 +112,74 @@ class Ether(BaseModel):
     def model_post_init(self, __context: Any) -> None:
         """Validate Ether configuration after initialization.
 
-        Currently performs basic validation. Future implementations may include
-        more sophisticated validation based on kind and schema_version.
+        Performs validation including:
+        - Basic configuration validation
+        - Large inline data detection (> 64 KB) with suggestions for attachments
         """
-        # Basic validation - ensure kind is not empty only if it was explicitly set
-        # Allow empty kind for models that don't specify a kind
-        pass
+        # Check for large inline data across all sections
+        self._validate_inline_size_limit()
+
+    def _validate_inline_size_limit(self) -> None:
+        """Validate that inline data doesn't exceed size limits.
+
+        Raises:
+            ValueError: If large inline data is detected with suggestion to use attachments
+        """
+        INLINE_SIZE_LIMIT = 64 * 1024  # 64 KB
+
+        def estimate_size(obj: Any) -> int:
+            """Estimate the size of an object in bytes."""
+            # TODO: Need a better way to estimate size of objects
+            if isinstance(obj, list | tuple):
+                return sum(estimate_size(item) for item in obj)
+            elif isinstance(obj, dict):
+                return sum(estimate_size(v) for v in obj.values())
+            elif isinstance(obj, str | bytes):
+                return len(obj)
+            elif isinstance(obj, int | float | bool):
+                return 8  # Approximate size for numeric types
+            else:
+                # TODO: Unknown type, warn and return 0
+                # TODO: Decide if we want to raise an error or not
+                return 0
+
+        def check_large_data(obj: Any, path: str = "") -> list[str]:
+            """Find paths to large data in the data."""
+            large_paths = []
+
+            if isinstance(obj, dict):
+                for key, value in obj.items():
+                    new_path = f"{path}.{key}" if path else key
+                    large_paths.extend(check_large_data(value, new_path))
+            else:
+                size = estimate_size(obj)
+                if size > INLINE_SIZE_LIMIT:
+                    large_paths.append(f"{path} (estimated {size} bytes)")
+
+            return large_paths
+
+        # Check all sections for large data
+        all_large_paths = []
+
+        # Check payload
+        payload_paths = check_large_data(self.payload, "payload")
+        all_large_paths.extend(payload_paths)
+
+        # Check metadata
+        metadata_paths = check_large_data(self.metadata, "metadata")
+        all_large_paths.extend(metadata_paths)
+
+        # Check extra_fields
+        extra_paths = check_large_data(self.extra_fields, "extra_fields")
+        all_large_paths.extend(extra_paths)
+
+        if all_large_paths:
+            paths_str = ", ".join(all_large_paths)
+            raise ValueError(
+                f"Large inline data detected: {paths_str}. "
+                f"Consider using attachments for data > {INLINE_SIZE_LIMIT // 1024} KB. "
+                "Use Attachment.from_numpy() for NumPy arrays or create attachments manually."
+            )
 
     @classmethod
     def register(
