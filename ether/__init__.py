@@ -36,8 +36,9 @@ Examples:
 from .attachment import Attachment
 from .core import Ether
 from .errors import ConversionError, RegistrationError
-from .kinds import TextModel
+from .kinds import TextModel, TokenModel
 from .node import Node
+from .nodes.tokenizer import TokenizerNode
 from .spec import EtherSpec
 
 # Version information
@@ -52,4 +53,6 @@ __all__ = [
     "Node",
     "RegistrationError",
     "TextModel",
+    "TokenModel",
+    "TokenizerNode",
 ]
