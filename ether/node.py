@@ -39,8 +39,50 @@ class Node:
         self.name = name
         self.version = version
 
+    def validate_input(self, eth: Ether) -> None:
+        """Validate that the input Ether envelope is acceptable for this node.
+
+        Checks that the envelope's (kind, schema_version) is in the node's accepts set.
+
+        Args:
+            eth: The input Ether envelope to validate
+
+        Raises:
+            ValueError: If the envelope is not acceptable for this node
+        """
+        if not self.accepts:
+            return  # No restrictions if accepts is empty
+
+        envelope_spec = (eth.kind, eth.schema_version)
+        if envelope_spec not in self.accepts:
+            accepted_str = ", ".join(f"{kind}.v{version}" for kind, version in sorted(self.accepts))
+            raise ValueError(
+                f"{self.__class__.__name__} expects one of: {accepted_str}, " f"got {eth.kind}.v{eth.schema_version}"
+            )
+
     def process(self, eth: Ether) -> Ether:
         """Process an Ether envelope.
+
+        This method should NOT be overridden.
+        Instead, override the _process method.
+        The base implementation validates the input
+        and calls the subclass's _process method.
+
+        Args:
+            eth: The input Ether envelope to process
+
+        Returns:
+            The processed Ether envelope
+
+        Raises:
+            ValueError: If the input envelope is not acceptable for this node
+            NotImplementedError: If the subclass doesn't override _process
+        """
+        self.validate_input(eth)
+        return self._process(eth)
+
+    def _process(self, eth: Ether) -> Ether:
+        """Process an Ether envelope (subclass implementation).
 
         This method should be overridden by subclasses to implement
         specific processing logic.
@@ -54,7 +96,7 @@ class Node:
         Raises:
             NotImplementedError: This method must be overridden by subclasses
         """
-        raise NotImplementedError(f"Node {self.__class__.__name__} must override process() method")
+        raise NotImplementedError(f"Node {self.__class__.__name__} must override _process() method")
 
     def append_lineage(self, eth: Ether) -> None:
         """Append lineage information to the Ether envelope metadata.
