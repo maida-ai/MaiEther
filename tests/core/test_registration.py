@@ -3,8 +3,32 @@
 import pytest
 from pydantic import BaseModel
 
-from ether.core import Ether, _spec_registry
+from ether import Registry
+from ether.core import Ether
 from ether.errors import RegistrationError
+from ether.spec import EtherSpec
+
+
+class TestRegistry:
+    """Test Registry functionality."""
+
+    def test_singleton(self) -> None:
+        """Test that the Registry is a singleton."""
+        r1 = Registry()
+        r2 = Registry()
+        assert r1 is r2
+
+    @pytest.mark.parametrize("method", ["spec", "adapter"])
+    def test_raises_error_on_duplicate_registration(self, method: str) -> None:
+        """Test that registering a duplicate model raises an error."""
+        getattr(Registry(), f"clear_{method}")()
+        getattr(Registry(), f"register_{method}")(
+            BaseModel, EtherSpec(payload_fields=("field1",), metadata_fields=("field2",))
+        )
+        with pytest.raises(ValueError, match="already registered for"):
+            getattr(Registry(), f"register_{method}")(
+                BaseModel, EtherSpec(payload_fields=("field1",), metadata_fields=("field2",))
+            )
 
 
 class TestEtherRegistration:
@@ -13,7 +37,7 @@ class TestEtherRegistration:
     def test_register_toy_model_success(self) -> None:
         """Test successful registration of a toy model."""
         # Clear registry for clean test
-        _spec_registry.clear()
+        Registry.clear_spec()
 
         @Ether.register(
             payload=["embedding"],
@@ -29,11 +53,11 @@ class TestEtherRegistration:
             note: str = "extra"
 
         # Verify registration was successful
-        assert len(_spec_registry) == 1
-        assert FooModel in _spec_registry
+        assert len(Registry.get_specs()) == 1
+        assert FooModel in Registry.get_specs()
 
         # Verify EtherSpec was created correctly
-        spec = _spec_registry[FooModel]
+        spec = Registry.get_spec(FooModel)
         assert spec.payload_fields == ("embedding",)
         assert spec.metadata_fields == ("source", "dim")
         assert spec.extra_fields == "keep"
@@ -43,7 +67,7 @@ class TestEtherRegistration:
     def test_register_unknown_field_raises_error(self) -> None:
         """Test that registering with unknown fields raises RegistrationError."""
         # Clear registry for clean test
-        _spec_registry.clear()
+        Registry.clear_spec()
 
         with pytest.raises(RegistrationError, match="FooModel: unknown field 'unknown_field'"):
 
@@ -60,7 +84,7 @@ class TestEtherRegistration:
     def test_register_without_renames(self) -> None:
         """Test registration without field renames."""
         # Clear registry for clean test
-        _spec_registry.clear()
+        Registry.clear_spec()
 
         @Ether.register(
             payload=["embedding"],
@@ -72,10 +96,10 @@ class TestEtherRegistration:
             source: str
 
         # Verify registration
-        assert len(_spec_registry) == 1
-        assert BarModel in _spec_registry
+        assert len(Registry.get_specs()) == 1
+        assert BarModel in Registry.get_specs()
 
-        spec = _spec_registry[BarModel]
+        spec = Registry.get_spec(BarModel)
         assert spec.payload_fields == ("embedding",)
         assert spec.metadata_fields == ("source",)
         assert spec.extra_fields == "ignore"
@@ -85,7 +109,7 @@ class TestEtherRegistration:
     def test_register_without_kind(self) -> None:
         """Test registration without specifying kind."""
         # Clear registry for clean test
-        _spec_registry.clear()
+        Registry.clear_spec()
 
         @Ether.register(
             payload=["data"],
@@ -96,16 +120,16 @@ class TestEtherRegistration:
             info: str
 
         # Verify registration
-        assert len(_spec_registry) == 1
-        assert BazModel in _spec_registry
+        assert len(Registry.get_specs()) == 1
+        assert BazModel in Registry.get_specs()
 
-        spec = _spec_registry[BazModel]
+        spec = Registry.get_spec(BazModel)
         assert spec.kind is None
 
     def test_register_with_empty_sequences(self) -> None:
         """Test registration with empty payload and metadata sequences."""
         # Clear registry for clean test
-        _spec_registry.clear()
+        Registry.clear_spec()
 
         @Ether.register(
             payload=[],
@@ -116,10 +140,10 @@ class TestEtherRegistration:
             extra_field: str = "test"
 
         # Verify registration
-        assert len(_spec_registry) == 1
-        assert EmptyModel in _spec_registry
+        assert len(Registry.get_specs()) == 1
+        assert EmptyModel in Registry.get_specs()
 
-        spec = _spec_registry[EmptyModel]
+        spec = Registry.get_spec(EmptyModel)
         assert spec.payload_fields == ()
         assert spec.metadata_fields == ()
         assert spec.extra_fields == "error"
@@ -127,7 +151,7 @@ class TestEtherRegistration:
     def test_register_multiple_models(self) -> None:
         """Test registering multiple models in the same registry."""
         # Clear registry for clean test
-        _spec_registry.clear()
+        Registry.clear_spec()
 
         @Ether.register(payload=["field1"], metadata=[], kind="type1")
         class Model1(BaseModel):
@@ -138,13 +162,13 @@ class TestEtherRegistration:
             field2: str
 
         # Verify both models are registered
-        assert len(_spec_registry) == 2
-        assert Model1 in _spec_registry
-        assert Model2 in _spec_registry
+        assert len(Registry.get_specs()) == 2
+        assert Model1 in Registry.get_specs()
+        assert Model2 in Registry.get_specs()
 
         # Verify different specs
-        spec1 = _spec_registry[Model1]
-        spec2 = _spec_registry[Model2]
+        spec1 = Registry.get_spec(Model1)
+        spec2 = Registry.get_spec(Model2)
         assert spec1.kind == "type1"
         assert spec2.kind == "type2"
         assert spec1.payload_fields == ("field1",)
@@ -153,7 +177,7 @@ class TestEtherRegistration:
     def test_register_with_complex_renames(self) -> None:
         """Test registration with complex field renames."""
         # Clear registry for clean test
-        _spec_registry.clear()
+        Registry.clear_spec()
 
         @Ether.register(
             payload=["embedding"],
@@ -169,10 +193,10 @@ class TestEtherRegistration:
             source: str
 
         # Verify registration
-        assert len(_spec_registry) == 1
-        assert ComplexModel in _spec_registry
+        assert len(Registry.get_specs()) == 1
+        assert ComplexModel in Registry.get_specs()
 
-        spec = _spec_registry[ComplexModel]
+        spec = Registry.get_spec(ComplexModel)
         assert spec.renames == {
             "embedding": "vec.values",
             "source": "model.source",
@@ -181,7 +205,7 @@ class TestEtherRegistration:
     def test_register_decorator_returns_model(self) -> None:
         """Test that the register decorator returns the model class."""
         # Clear registry for clean test
-        _spec_registry.clear()
+        Registry.clear_spec()
 
         @Ether.register(payload=["field"], metadata=[])
         class TestModel(BaseModel):
@@ -190,12 +214,12 @@ class TestEtherRegistration:
         # Verify the decorator returned the model class
         assert TestModel.__name__ == "TestModel"
         assert issubclass(TestModel, BaseModel)
-        assert TestModel in _spec_registry
+        assert TestModel in Registry.get_specs()
 
     def test_issue_26_acceptance_criteria(self) -> None:
         """Test the specific acceptance criteria from issue #26."""
         # Clear registry for clean test
-        _spec_registry.clear()
+        Registry.clear_spec()
 
         # Acceptance criteria 1: Unit test registers a toy FooModel; registry length == 1
         @Ether.register(
@@ -212,8 +236,8 @@ class TestEtherRegistration:
             note: str = "extra"
 
         # Verify registry length == 1
-        assert len(_spec_registry) == 1
-        assert FooModel in _spec_registry
+        assert len(Registry.get_specs()) == 1
+        assert FooModel in Registry.get_specs()
 
         # Acceptance criteria 2: Attempt to re-register same model raises RegistrationError
         # Note: The current implementation allows re-registration, but we can test
@@ -228,12 +252,12 @@ class TestEtherRegistration:
             source: str
 
         # Verify that a different model can be registered
-        assert len(_spec_registry) == 2
-        assert FooModelV2 in _spec_registry
+        assert len(Registry.get_specs()) == 2
+        assert FooModelV2 in Registry.get_specs()
 
         # Verify that the specs are different
-        spec1 = _spec_registry[FooModel]
-        spec2 = _spec_registry[FooModelV2]
+        spec1 = Registry.get_spec(FooModel)
+        spec2 = Registry.get_spec(FooModelV2)
         assert spec1.kind == "embedding"
         assert spec2.kind == "embedding_v2"
         assert spec1.metadata_fields == ("source", "dim")

@@ -6,7 +6,8 @@ import pytest
 from jsonschema import Draft202012Validator
 from pydantic import BaseModel, ValidationError
 
-from ether.core import Ether, _spec_registry
+from ether import Registry
+from ether.core import Ether
 from ether.kinds import TextModel
 from tests.kinds import SCHEMAS_DIR
 
@@ -17,7 +18,7 @@ class TestTextModelRegistration:
     def test_text_model_registration(self) -> None:
         """Test that TextModel is properly registered with Ether."""
         # Clear registry for clean test
-        _spec_registry.clear()
+        Registry.clear_spec()
 
         # Re-register TextModel since registration happens at class definition time
         from ether.kinds import TextModel
@@ -31,11 +32,11 @@ class TestTextModelRegistration:
             renames={},
             kind="text",
         )
-        _spec_registry[TextModel] = spec
+        Registry.set_spec(TextModel, spec)
 
         # Verify registration
-        assert TextModel in _spec_registry
-        spec = _spec_registry[TextModel]
+        spec = Registry.get_spec(TextModel)
+        assert spec is not None
         assert spec.kind == "text"
         assert spec.payload_fields == ("text",)
         assert spec.metadata_fields == ("lang", "encoding", "detected_lang_conf")
@@ -44,7 +45,7 @@ class TestTextModelRegistration:
     def test_text_model_round_trip_conversion(self) -> None:
         """Test round-trip conversion: TextModel -> Ether -> TextModel."""
         # Clear registry for clean test
-        _spec_registry.clear()
+        Registry.clear_spec()
 
         # Re-register TextModel
         from ether.kinds import TextModel
@@ -57,7 +58,7 @@ class TestTextModelRegistration:
             renames={},
             kind="text",
         )
-        _spec_registry[TextModel] = spec
+        Registry.set_spec(TextModel, spec)
 
         # Create TextModel instance
         original_model = TextModel(text="Hello, world!", lang="en", encoding="utf-8", detected_lang_conf=0.95)
@@ -90,7 +91,7 @@ class TestTextModelRegistration:
     def test_text_model_minimal_fields(self) -> None:
         """Test TextModel with only required fields."""
         # Clear registry for clean test
-        _spec_registry.clear()
+        Registry.clear_spec()
 
         # Re-register TextModel
         from ether.kinds import TextModel
@@ -103,7 +104,7 @@ class TestTextModelRegistration:
             renames={},
             kind="text",
         )
-        _spec_registry[TextModel] = spec
+        Registry.set_spec(TextModel, spec)
 
         # Create TextModel with only text field
         original_model = TextModel(text="Minimal text")
@@ -133,7 +134,7 @@ class TestTextModelRegistration:
     def test_text_model_constructor_with_model(self) -> None:
         """Test Ether constructor with TextModel."""
         # Clear registry for clean test
-        _spec_registry.clear()
+        Registry.clear_spec()
 
         # Re-register TextModel
         from ether.kinds import TextModel
@@ -146,7 +147,7 @@ class TestTextModelRegistration:
             renames={},
             kind="text",
         )
-        _spec_registry[TextModel] = spec
+        Registry.set_spec(TextModel, spec)
 
         # Create TextModel and use Ether constructor
         model = TextModel(text="Constructor test", lang="en")
@@ -165,7 +166,7 @@ class TestTextModelRegistration:
     def test_text_model_require_kind_validation(self) -> None:
         """Test require_kind validation with TextModel."""
         # Clear registry for clean test
-        _spec_registry.clear()
+        Registry.clear_spec()
 
         # Re-register TextModel
         from ether.kinds import TextModel
@@ -178,7 +179,7 @@ class TestTextModelRegistration:
             renames={},
             kind="text",
         )
-        _spec_registry[TextModel] = spec
+        Registry.set_spec(TextModel, spec)
 
         # Create TextModel and convert to Ether
         model = TextModel(text="Kind validation test")
@@ -190,7 +191,10 @@ class TestTextModelRegistration:
 
         # Create Ether with different kind
         wrong_kind_ether = Ether(
-            kind="embedding", schema_version=1, payload={"text": "Wrong kind"}, metadata={}  # Different kind
+            kind="embedding",
+            schema_version=1,
+            payload={"text": "Wrong kind"},
+            metadata={},  # Different kind
         )
 
         # Should fail with require_kind=True
@@ -201,7 +205,7 @@ class TestTextModelRegistration:
     def test_text_model_produces_valid_schema_envelope(self) -> None:
         """Test that TextModel produces Ether envelopes that validate against text.v1 schema."""
         # Clear registry for clean test
-        _spec_registry.clear()
+        Registry.clear_spec()
 
         # Re-register TextModel
         from ether.kinds import TextModel
@@ -214,7 +218,7 @@ class TestTextModelRegistration:
             renames={},
             kind="text",
         )
-        _spec_registry[TextModel] = spec
+        Registry.set_spec(TextModel, spec)
 
         # Load the text.v1 schema
         schema_path = SCHEMAS_DIR / "text" / "v1.json"
@@ -242,7 +246,7 @@ class TestTextModelRegistration:
     def test_text_model_strict_type_compliance(self) -> None:
         """Test that TextModel strictly complies with text.v1 schema types."""
         # Clear registry for clean test
-        _spec_registry.clear()
+        Registry.clear_spec()
 
         # Re-register TextModel
         from ether.kinds import TextModel
@@ -255,7 +259,7 @@ class TestTextModelRegistration:
             renames={},
             kind="text",
         )
-        _spec_registry[TextModel] = spec
+        Registry.set_spec(TextModel, spec)
 
         # Test 1: Required text field must be string
         model = TextModel(text="Valid string text")
@@ -320,7 +324,7 @@ class TestTextModelRegistration:
     def test_text_model_binding_mechanism_compliance(self) -> None:
         """Test that TextModel follows the binding mechanism matrix requirements."""
         # Clear registry for clean test
-        _spec_registry.clear()
+        Registry.clear_spec()
 
         # Re-register TextModel
         from ether.kinds import TextModel
@@ -333,7 +337,7 @@ class TestTextModelRegistration:
             renames={},
             kind="text",
         )
-        _spec_registry[TextModel] = spec
+        Registry.set_spec(TextModel, spec)
 
         # Verify the binding mechanism matrix compliance:
         # | Canonical JSON-Schema file  | Matching edge model    | Binding mechanism                        |
@@ -395,7 +399,7 @@ class TestTextModelMisRegistration:
     def test_missing_required_field_raises_error(self) -> None:
         """Test that missing required field raises RegistrationError."""
         # Clear registry for clean test
-        _spec_registry.clear()
+        Registry.clear_spec()
 
         # Try to register a model with missing required field
         with pytest.raises(Exception) as exc_info:
@@ -410,7 +414,7 @@ class TestTextModelMisRegistration:
     def test_duplicate_field_mapping_raises_error(self) -> None:
         """Test that duplicate field mapping raises error."""
         # Clear registry for clean test
-        _spec_registry.clear()
+        Registry.clear_spec()
 
         # Try to register with different field names mapping to the same path
         with pytest.raises(Exception) as exc_info:
@@ -433,7 +437,7 @@ class TestTextModelMisRegistration:
     def test_field_in_both_payload_and_metadata_raises_error(self) -> None:
         """Test that field in both payload and metadata raises error."""
         # Clear registry for clean test
-        _spec_registry.clear()
+        Registry.clear_spec()
 
         # Try to register with same field in both payload and metadata
         with pytest.raises(Exception) as exc_info:
@@ -465,7 +469,7 @@ class TestTextModelValidation:
     def test_text_model_extra_fields_ignored(self) -> None:
         """Test that extra fields are ignored in TextModel registration."""
         # Clear registry for clean test
-        _spec_registry.clear()
+        Registry.clear_spec()
 
         # Create a model with extra fields
         @Ether.register(payload=["text"], metadata=["lang"], extra_fields="ignore", kind="text")

@@ -2,8 +2,7 @@
 
 import pytest
 
-from ether import Ether, TextModel, TokenModel
-from ether.core import _spec_registry
+from ether import Ether, Registry, TextModel, TokenModel
 from ether.spec import EtherSpec
 from examples.demo.nodes.tokenizer import TokenizerNode
 
@@ -14,7 +13,7 @@ class TestTokenizerNode:
     def setup_method(self) -> None:
         """Set up test method by registering required models."""
         # Clear registry for clean test
-        _spec_registry.clear()
+        Registry.clear_spec()
 
         # Register TextModel
         text_spec = EtherSpec(
@@ -24,7 +23,7 @@ class TestTokenizerNode:
             renames={},
             kind="text",
         )
-        _spec_registry[TextModel] = text_spec
+        Registry.set_spec(TextModel, text_spec)
 
         # Register TokenModel
         token_spec = EtherSpec(
@@ -34,7 +33,7 @@ class TestTokenizerNode:
             renames={},
             kind="tokens",
         )
-        _spec_registry[TokenModel] = token_spec
+        Registry.set_spec(TokenModel, token_spec)
 
     def test_tokenizer_node_instantiation(self) -> None:
         """Test that TokenizerNode can be instantiated with default attributes."""

@@ -2,8 +2,7 @@
 
 import pytest
 
-from ether import EmbeddingModel, Ether, TokenModel
-from ether.core import _spec_registry
+from ether import EmbeddingModel, Ether, Registry, TokenModel
 from ether.spec import EtherSpec
 from examples.demo.nodes.embedder import EmbedderNode
 
@@ -14,7 +13,7 @@ class TestEmbedderNode:
     def setup_method(self) -> None:
         """Set up test method by registering required models."""
         # Clear registry for clean test
-        _spec_registry.clear()
+        Registry.clear_spec()
 
         # Register TokenModel
         token_spec = EtherSpec(
@@ -24,7 +23,7 @@ class TestEmbedderNode:
             renames={},
             kind="tokens",
         )
-        _spec_registry[TokenModel] = token_spec
+        Registry.set_spec(TokenModel, token_spec)
 
         # Register EmbeddingModel
         embedding_spec = EtherSpec(
@@ -34,7 +33,7 @@ class TestEmbedderNode:
             renames={},
             kind="embedding",
         )
-        _spec_registry[EmbeddingModel] = embedding_spec
+        Registry.set_spec(EmbeddingModel, embedding_spec)
 
     def test_embedder_node_instantiation(self) -> None:
         """Test that EmbedderNode can be instantiated with default attributes."""

@@ -3,7 +3,8 @@
 import pytest
 from pydantic import BaseModel
 
-from ether.core import Ether, _spec_registry
+from ether import Registry
+from ether.core import Ether
 from ether.errors import ConversionError, RegistrationError
 
 
@@ -13,7 +14,7 @@ class TestEtherFromModel:
     def test_from_model_basic_conversion(self) -> None:
         """Test basic conversion from model to Ether."""
         # Clear registry for clean test
-        _spec_registry.clear()
+        Registry.clear_spec()
 
         @Ether.register(
             payload=["embedding", "dim"],
@@ -48,7 +49,7 @@ class TestEtherFromModel:
     def test_from_model_with_custom_schema_version(self) -> None:
         """Test from_model with custom schema version."""
         # Clear registry for clean test
-        _spec_registry.clear()
+        Registry.clear_spec()
 
         @Ether.register(payload=["data"], metadata=[], kind="test")
         class TestModel(BaseModel):
@@ -74,7 +75,7 @@ class TestEtherFromModel:
     def test_from_model_extra_fields_error_policy(self) -> None:
         """Test from_model with extra_fields='error' policy."""
         # Clear registry for clean test
-        _spec_registry.clear()
+        Registry.clear_spec()
 
         @Ether.register(
             payload=["data"],
@@ -94,7 +95,7 @@ class TestEtherFromModel:
     def test_from_model_extra_fields_keep_policy(self) -> None:
         """Test from_model with extra_fields='keep' policy."""
         # Clear registry for clean test
-        _spec_registry.clear()
+        Registry.clear_spec()
 
         @Ether.register(
             payload=["data"],
@@ -115,7 +116,7 @@ class TestEtherFromModel:
     def test_from_model_extra_fields_ignore_policy(self) -> None:
         """Test from_model with extra_fields='ignore' policy."""
         # Clear registry for clean test
-        _spec_registry.clear()
+        Registry.clear_spec()
 
         @Ether.register(
             payload=["data"],
@@ -136,7 +137,7 @@ class TestEtherFromModel:
     def test_from_model_with_nested_renames(self) -> None:
         """Test from_model with nested field renames."""
         # Clear registry for clean test
-        _spec_registry.clear()
+        Registry.clear_spec()
 
         @Ether.register(
             payload=["embedding"],
@@ -164,7 +165,7 @@ class TestEtherFromModel:
     def test_from_model_without_kind(self) -> None:
         """Test from_model with model registered without kind."""
         # Clear registry for clean test
-        _spec_registry.clear()
+        Registry.clear_spec()
 
         @Ether.register(payload=["data"], metadata=[])
         class TestModel(BaseModel):

@@ -9,8 +9,7 @@ import time
 
 import pytest
 
-from ether import EmbeddingModel, Ether, TextModel, TokenModel
-from ether.core import _spec_registry
+from ether import EmbeddingModel, Ether, Registry, TextModel, TokenModel
 from ether.spec import EtherSpec
 from examples.demo.nodes.embedder import EmbedderNode
 from examples.demo.nodes.tokenizer import TokenizerNode
@@ -22,7 +21,7 @@ class TestDemoPipeline:
     def setup_method(self) -> None:
         """Set up test method by registering required models."""
         # Clear registry for clean test
-        _spec_registry.clear()
+        Registry.clear_spec()
 
         # Register TextModel
         text_spec = EtherSpec(
@@ -32,7 +31,7 @@ class TestDemoPipeline:
             renames={},
             kind="text",
         )
-        _spec_registry[TextModel] = text_spec
+        Registry.set_spec(TextModel, text_spec)
 
         # Register TokenModel
         token_spec = EtherSpec(
@@ -42,7 +41,7 @@ class TestDemoPipeline:
             renames={},
             kind="tokens",
         )
-        _spec_registry[TokenModel] = token_spec
+        Registry.set_spec(TokenModel, token_spec)
 
         # Register EmbeddingModel
         embedding_spec = EtherSpec(
@@ -52,7 +51,7 @@ class TestDemoPipeline:
             renames={},
             kind="embedding",
         )
-        _spec_registry[EmbeddingModel] = embedding_spec
+        Registry.set_spec(EmbeddingModel, embedding_spec)
 
     def test_demo_pipeline_complete_flow(self) -> None:
         """Test the complete demo pipeline flow from text to embedding."""

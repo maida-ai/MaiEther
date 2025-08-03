@@ -6,8 +6,9 @@ import pytest
 from jsonschema import Draft202012Validator
 from pydantic import BaseModel, ValidationError
 
+from ether import Registry
 from ether.attachment import Attachment
-from ether.core import Ether, _spec_registry
+from ether.core import Ether
 from ether.kinds import EmbeddingModel
 from tests.kinds import SCHEMAS_DIR
 
@@ -18,7 +19,7 @@ class TestEmbeddingModelRegistration:
     def test_embedding_model_registration(self) -> None:
         """Test that EmbeddingModel is properly registered with Ether."""
         # Clear registry for clean test
-        _spec_registry.clear()
+        Registry.clear_spec()
 
         # Re-register EmbeddingModel since registration happens at class definition time
         from ether.kinds import EmbeddingModel
@@ -32,11 +33,11 @@ class TestEmbeddingModelRegistration:
             renames={},
             kind="embedding",
         )
-        _spec_registry[EmbeddingModel] = spec
+        Registry.set_spec(EmbeddingModel, spec)
 
         # Verify registration
-        assert EmbeddingModel in _spec_registry
-        spec = _spec_registry[EmbeddingModel]
+        spec = Registry.get_spec(EmbeddingModel)
+        assert spec is not None
         assert spec.kind == "embedding"
         assert spec.payload_fields == ("values", "dim")
         assert spec.metadata_fields == ("source",)
@@ -45,7 +46,7 @@ class TestEmbeddingModelRegistration:
     def test_embedding_model_round_trip_conversion(self) -> None:
         """Test round-trip conversion: EmbeddingModel -> Ether -> EmbeddingModel."""
         # Clear registry for clean test
-        _spec_registry.clear()
+        Registry.clear_spec()
 
         # Re-register EmbeddingModel
         from ether.kinds import EmbeddingModel
@@ -58,7 +59,7 @@ class TestEmbeddingModelRegistration:
             renames={},
             kind="embedding",
         )
-        _spec_registry[EmbeddingModel] = spec
+        Registry.set_spec(EmbeddingModel, spec)
 
         # Create EmbeddingModel instance with inline values
         original_model = EmbeddingModel(values=[1.0, 2.0, 3.0], dim=3, source="test-model")
@@ -88,7 +89,7 @@ class TestEmbeddingModelRegistration:
     def test_embedding_model_with_none_values(self) -> None:
         """Test EmbeddingModel with values=None (for attachment-based transport)."""
         # Clear registry for clean test
-        _spec_registry.clear()
+        Registry.clear_spec()
 
         # Re-register EmbeddingModel
         from ether.kinds import EmbeddingModel
@@ -101,7 +102,7 @@ class TestEmbeddingModelRegistration:
             renames={},
             kind="embedding",
         )
-        _spec_registry[EmbeddingModel] = spec
+        Registry.set_spec(EmbeddingModel, spec)
 
         # Create EmbeddingModel with None values
         original_model = EmbeddingModel(values=None, dim=768, source="bert-base-uncased")
@@ -128,7 +129,7 @@ class TestEmbeddingModelRegistration:
     def test_embedding_model_minimal_fields(self) -> None:
         """Test EmbeddingModel with only required fields."""
         # Clear registry for clean test
-        _spec_registry.clear()
+        Registry.clear_spec()
 
         # Re-register EmbeddingModel
         from ether.kinds import EmbeddingModel
@@ -141,7 +142,7 @@ class TestEmbeddingModelRegistration:
             renames={},
             kind="embedding",
         )
-        _spec_registry[EmbeddingModel] = spec
+        Registry.set_spec(EmbeddingModel, spec)
 
         # Create EmbeddingModel with only dim field
         original_model = EmbeddingModel(dim=512)
@@ -168,7 +169,7 @@ class TestEmbeddingModelRegistration:
     def test_embedding_model_constructor_with_model(self) -> None:
         """Test Ether constructor with EmbeddingModel."""
         # Clear registry for clean test
-        _spec_registry.clear()
+        Registry.clear_spec()
 
         # Re-register EmbeddingModel
         from ether.kinds import EmbeddingModel
@@ -181,7 +182,7 @@ class TestEmbeddingModelRegistration:
             renames={},
             kind="embedding",
         )
-        _spec_registry[EmbeddingModel] = spec
+        Registry.set_spec(EmbeddingModel, spec)
 
         # Create EmbeddingModel and use Ether constructor
         model = EmbeddingModel(values=[1.0, 2.0], dim=2, source="test")
@@ -198,7 +199,7 @@ class TestEmbeddingModelRegistration:
     def test_embedding_model_require_kind_validation(self) -> None:
         """Test require_kind validation with EmbeddingModel."""
         # Clear registry for clean test
-        _spec_registry.clear()
+        Registry.clear_spec()
 
         # Re-register EmbeddingModel
         from ether.kinds import EmbeddingModel
@@ -211,7 +212,7 @@ class TestEmbeddingModelRegistration:
             renames={},
             kind="embedding",
         )
-        _spec_registry[EmbeddingModel] = spec
+        Registry.set_spec(EmbeddingModel, spec)
 
         # Create EmbeddingModel and convert to Ether
         model = EmbeddingModel(values=[1.0], dim=1)
@@ -224,7 +225,10 @@ class TestEmbeddingModelRegistration:
 
         # Create Ether with different kind
         wrong_kind_ether = Ether(
-            kind="text", schema_version=1, payload={"values": [1.0], "dim": 1}, metadata={}  # Different kind
+            kind="text",
+            schema_version=1,
+            payload={"values": [1.0], "dim": 1},
+            metadata={},  # Different kind
         )
 
         # Should fail with require_kind=True
@@ -235,7 +239,7 @@ class TestEmbeddingModelRegistration:
     def test_embedding_model_produces_valid_schema_envelope(self) -> None:
         """Test that EmbeddingModel produces Ether envelopes that validate against embedding.v1 schema."""
         # Clear registry for clean test
-        _spec_registry.clear()
+        Registry.clear_spec()
 
         # Re-register EmbeddingModel
         from ether.kinds import EmbeddingModel
@@ -248,7 +252,7 @@ class TestEmbeddingModelRegistration:
             renames={},
             kind="embedding",
         )
-        _spec_registry[EmbeddingModel] = spec
+        Registry.set_spec(EmbeddingModel, spec)
 
         # Load the embedding.v1 schema
         schema_path = SCHEMAS_DIR / "embedding" / "v1.json"
@@ -276,7 +280,7 @@ class TestEmbeddingModelRegistration:
     def test_embedding_model_strict_type_compliance(self) -> None:
         """Test that EmbeddingModel strictly complies with embedding.v1 schema types."""
         # Clear registry for clean test
-        _spec_registry.clear()
+        Registry.clear_spec()
 
         # Re-register EmbeddingModel
         from ether.kinds import EmbeddingModel
@@ -289,7 +293,7 @@ class TestEmbeddingModelRegistration:
             renames={},
             kind="embedding",
         )
-        _spec_registry[EmbeddingModel] = spec
+        Registry.set_spec(EmbeddingModel, spec)
 
         # Test 1: Required dim field must be positive integer
         model = EmbeddingModel(dim=768)
@@ -341,7 +345,7 @@ class TestEmbeddingModelRegistration:
     def test_embedding_model_binding_mechanism_compliance(self) -> None:
         """Test that EmbeddingModel follows the binding mechanism matrix requirements."""
         # Clear registry for clean test
-        _spec_registry.clear()
+        Registry.clear_spec()
 
         # Re-register EmbeddingModel
         from ether.kinds import EmbeddingModel
@@ -354,7 +358,7 @@ class TestEmbeddingModelRegistration:
             renames={},
             kind="embedding",
         )
-        _spec_registry[EmbeddingModel] = spec
+        Registry.set_spec(EmbeddingModel, spec)
 
         # Verify the binding mechanism matrix compliance:
         # | Canonical JSON-Schema file  | Matching edge model    | Binding mechanism                        |
@@ -415,7 +419,7 @@ class TestEmbeddingModelMisRegistration:
     def test_missing_required_field_raises_error(self) -> None:
         """Test that missing required field raises RegistrationError."""
         # Clear registry for clean test
-        _spec_registry.clear()
+        Registry.clear_spec()
 
         # Try to register a model with missing required field
         with pytest.raises(Exception) as exc_info:
@@ -433,7 +437,7 @@ class TestEmbeddingModelMisRegistration:
     def test_duplicate_field_mapping_raises_error(self) -> None:
         """Test that duplicate field mapping raises error."""
         # Clear registry for clean test
-        _spec_registry.clear()
+        Registry.clear_spec()
 
         # Try to register with different field names mapping to the same path
         with pytest.raises(Exception) as exc_info:
@@ -456,7 +460,7 @@ class TestEmbeddingModelMisRegistration:
     def test_field_in_both_payload_and_metadata_raises_error(self) -> None:
         """Test that field in both payload and metadata raises error."""
         # Clear registry for clean test
-        _spec_registry.clear()
+        Registry.clear_spec()
 
         # Try to register with same field in both payload and metadata
         with pytest.raises(Exception) as exc_info:
@@ -518,7 +522,7 @@ class TestEmbeddingModelValidation:
     def test_embedding_model_extra_fields_ignored(self) -> None:
         """Test that extra fields are ignored in EmbeddingModel registration."""
         # Clear registry for clean test
-        _spec_registry.clear()
+        Registry.clear_spec()
 
         # Create a model with extra fields
         @Ether.register(payload=["values", "dim"], metadata=["source"], extra_fields="ignore", kind="embedding")
@@ -544,7 +548,7 @@ class TestEmbeddingModelWithAttachments:
     def test_embedding_model_with_attachment(self) -> None:
         """Test creating model with values=None and an Attachment passes conversion."""
         # Clear registry for clean test
-        _spec_registry.clear()
+        Registry.clear_spec()
 
         # Re-register EmbeddingModel
         from ether.kinds import EmbeddingModel
@@ -557,7 +561,7 @@ class TestEmbeddingModelWithAttachments:
             renames={},
             kind="embedding",
         )
-        _spec_registry[EmbeddingModel] = spec
+        Registry.set_spec(EmbeddingModel, spec)
 
         # Create attachment for large embedding vector
         attachment = Attachment(
@@ -600,7 +604,7 @@ class TestEmbeddingModelWithAttachments:
     def test_embedding_model_inline_list_round_trip(self) -> None:
         """Test creating model with inline list, round-trips."""
         # Clear registry for clean test
-        _spec_registry.clear()
+        Registry.clear_spec()
 
         # Re-register EmbeddingModel
         from ether.kinds import EmbeddingModel
@@ -613,7 +617,7 @@ class TestEmbeddingModelWithAttachments:
             renames={},
             kind="embedding",
         )
-        _spec_registry[EmbeddingModel] = spec
+        Registry.set_spec(EmbeddingModel, spec)
 
         # Create EmbeddingModel with inline values
         original_values = [1.0, 2.0, 3.0, 4.0, 5.0]

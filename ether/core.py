@@ -33,16 +33,14 @@ from typing import Any, TypeVar
 
 from pydantic import BaseModel, Field, PrivateAttr, ValidationError
 
+from ether import Registry
+
 from .attachment import Attachment
 from .errors import ConversionError, RegistrationError
 from .spec import EtherSpec
 from .utils import rfc3339_now
 
 ModelT = TypeVar("ModelT", bound=BaseModel)
-
-# Registries - defined at module level for easy access
-_spec_registry: dict[type[BaseModel], EtherSpec] = {}
-_adapter_registry: dict[tuple[type[BaseModel], type[BaseModel]], Callable[["Ether"], dict]] = {}
 
 
 def _missing_required(model_cls: type[BaseModel], present: Sequence[str]) -> set[str]:
@@ -242,7 +240,8 @@ class Ether(BaseModel):
                 dict(renames or {}),
                 kind,
             )
-            _spec_registry[model_cls] = spec
+            # Registry.set_spec(model_cls, spec)
+            Registry.register_spec(model_cls, spec)
             return model_cls
 
         return _decorator
@@ -271,7 +270,7 @@ class Ether(BaseModel):
         """
 
         def _decorator(fn: Callable[["Ether"], dict]) -> Callable[["Ether"], dict]:
-            _adapter_registry[(src, dst)] = fn
+            Registry.register_adapter((src, dst), fn)
             return fn
 
         return _decorator
@@ -305,7 +304,7 @@ class Ether(BaseModel):
             >>> ether.kind == "embedding"
             True
         """
-        spec = _spec_registry.get(type(model_instance))
+        spec = Registry.get_spec(type(model_instance))
         if not spec:
             raise RegistrationError(f"{type(model_instance).__name__} not registered")
 
@@ -417,7 +416,7 @@ class Ether(BaseModel):
             >>> model.embedding == [1.0]
             True
         """
-        spec = _spec_registry.get(target_model)
+        spec = Registry.get_spec(target_model)
         if not spec:
             raise RegistrationError(f"{target_model.__name__} not registered")
 
@@ -426,7 +425,7 @@ class Ether(BaseModel):
 
         # adapter path
         if self._source_model is not None:
-            adapter = _adapter_registry.get((self._source_model, target_model))
+            adapter = Registry.get_adapter(self._source_model, target_model)
             if adapter:
                 return target_model.model_validate(adapter(self))  # type: ignore[no-any-return]
 

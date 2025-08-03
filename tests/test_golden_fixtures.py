@@ -11,7 +11,8 @@ from typing import Any
 import pytest
 from jsonschema import Draft202012Validator
 
-from ether.core import Ether, _spec_registry
+from ether import Registry
+from ether.core import Ether
 from ether.kinds import EmbeddingModel, TextModel, TokenModel
 from tests.kinds import SCHEMAS_DIR
 
@@ -60,7 +61,7 @@ class TestGoldenFixtures:
 
         # Test round-trip conversion
         # Clear registry for clean test
-        _spec_registry.clear()
+        Registry.clear_spec()
 
         # Re-register EmbeddingModel
         from ether.spec import EtherSpec
@@ -72,7 +73,7 @@ class TestGoldenFixtures:
             renames={},
             kind="embedding",
         )
-        _spec_registry[EmbeddingModel] = spec
+        Registry.set_spec(EmbeddingModel, spec)
 
         # Create Ether from fixture data
         ether = Ether.model_validate(fixture_data)
@@ -121,7 +122,7 @@ class TestGoldenFixtures:
 
         # Test round-trip conversion
         # Clear registry for clean test
-        _spec_registry.clear()
+        Registry.clear_spec()
 
         # Re-register TextModel
         from ether.spec import EtherSpec
@@ -133,7 +134,7 @@ class TestGoldenFixtures:
             renames={},
             kind="text",
         )
-        _spec_registry[TextModel] = spec
+        Registry.set_spec(TextModel, spec)
 
         # Create Ether from fixture data
         ether = Ether.model_validate(fixture_data)
@@ -179,7 +180,7 @@ class TestGoldenFixtures:
 
         # Test round-trip conversion
         # Clear registry for clean test
-        _spec_registry.clear()
+        Registry.clear_spec()
 
         # Re-register TokenModel
         from ether.spec import EtherSpec
@@ -191,7 +192,7 @@ class TestGoldenFixtures:
             renames={},
             kind="tokens",
         )
-        _spec_registry[TokenModel] = spec
+        Registry.set_spec(TokenModel, spec)
 
         # Create Ether from fixture data
         ether = Ether.model_validate(fixture_data)
@@ -255,7 +256,7 @@ class TestGoldenFixtures:
 
         # Test round-trip conversion with attachment
         # Clear registry for clean test
-        _spec_registry.clear()
+        Registry.clear_spec()
 
         # Re-register EmbeddingModel
         from ether.spec import EtherSpec
@@ -267,7 +268,7 @@ class TestGoldenFixtures:
             renames={},
             kind="embedding",
         )
-        _spec_registry[EmbeddingModel] = spec
+        Registry.set_spec(EmbeddingModel, spec)
 
         # Create Ether from fixture data
         ether = Ether.model_validate(fixture_data)

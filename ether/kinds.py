@@ -30,6 +30,7 @@ from .core import Ether
     metadata=["lang", "encoding", "detected_lang_conf"],
     extra_fields="ignore",
     kind="text",
+    renames={"text": "text.text"},
 )
 class TextModel(BaseModel):
     """Text data model for transport via Ether envelopes.
