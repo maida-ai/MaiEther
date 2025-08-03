@@ -72,6 +72,10 @@ class EmbedderNode(Node):
         # Convert EmbeddingModel to Ether envelope
         result_eth = Ether.from_model(embedding_model)
 
+        # Preserve lineage from input envelope
+        if "lineage" in eth.metadata:
+            result_eth.metadata["lineage"] = eth.metadata["lineage"].copy()
+
         # Append lineage information
         self.append_lineage(result_eth)
 
