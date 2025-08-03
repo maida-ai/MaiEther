@@ -320,6 +320,10 @@ Control how unmapped fields are handled:
 1. **Use attachments for large data**: Avoid putting large arrays in payload
 2. **Zero-copy when possible**: Use shared memory URIs for attachments
 3. **Validate at boundaries**: Only validate at ingress/egress points
+4. **Model conversion overhead**: `Ether.as_model()` performs field mapping, flattening, and validation which can create copies of payload/metadata structures. For hot paths with large nested data, consider:
+   - Moving large data to **attachments** where zero-copy is possible
+   - Keeping payload/metadata structures small and simple
+   - Using adapters for complex transformations instead of field renames
 
 ### Error Handling
 

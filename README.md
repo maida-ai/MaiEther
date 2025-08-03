@@ -566,6 +566,10 @@ message EtherProto {
 ## 7. Performance Guidance
 
 * **Don't copy big arrays.** Prefer **attachments** with `uri` (shared memory, memory-mapped files, Arrow IPC) so downstream nodes can zero-copy read.
+* **Model conversion overhead**: `Ether.as_model()` performs field mapping, flattening, and validation which can create copies of payload/metadata structures. For hot paths with large nested data, consider:
+  * Moving large data to **attachments** where zero-copy is possible
+  * Keeping payload/metadata structures small and simple
+  * Using adapters for complex transformations instead of field renames
 * For Python:
 
   * Use **NumPy memoryviews** and **Arrow C Data Interface** to interop without copies.
