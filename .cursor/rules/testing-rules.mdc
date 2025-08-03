@@ -12,3 +12,4 @@ alwaysApply: false
 - Include edge cases and error conditions in the tests
 - Directory structure of the tests must follow the directory structure under `ether/`
   - For example, tests for `ether/layers/some_file.py` must reside under `tests/layers/test_some_file.py`
+- For demo and examples, the tests are located under `examples/tests`
