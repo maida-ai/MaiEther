@@ -2,10 +2,10 @@
 
 import pytest
 
-from examples.demo.nodes.embedder import EmbedderNode
 from ether import EmbeddingModel, Ether, TokenModel
 from ether.core import _spec_registry
 from ether.spec import EtherSpec
+from examples.demo.nodes.embedder import EmbedderNode
 
 
 class TestEmbedderNode:

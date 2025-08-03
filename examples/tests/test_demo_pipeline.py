@@ -9,11 +9,11 @@ import time
 
 import pytest
 
-from demo.nodes.embedder import EmbedderNode
-from demo.nodes.tokenizer import TokenizerNode
 from ether import EmbeddingModel, Ether, TextModel, TokenModel
 from ether.core import _spec_registry
 from ether.spec import EtherSpec
+from examples.demo.nodes.embedder import EmbedderNode
+from examples.demo.nodes.tokenizer import TokenizerNode
 
 
 class TestDemoPipeline:
