@@ -54,6 +54,11 @@ class TestEtherSpec:
                 renames={"field1": "payload.duplicate", "field2": "payload.duplicate"},
             )
 
+    def test_spec_with_self_renames(self) -> None:
+        """Test if renames are noop"""
+        spec = EtherSpec(payload_fields=("field1",), metadata_fields=("meta1",), renames={"field1": "field1"})
+        assert spec.renames == {}
+
     def test_spec_is_mutable(self) -> None:
         """Test that EtherSpec instances are mutable."""
         spec = EtherSpec(payload_fields=("field1",), metadata_fields=("meta1",))

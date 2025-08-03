@@ -15,11 +15,22 @@ from tests.kinds import SCHEMAS_DIR
 class TestTextModelRegistration:
     """Test TextModel registration with Ether."""
 
-    def test_text_model_registration(self) -> None:
-        """Test that TextModel is properly registered with Ether."""
-        # Clear registry for clean test
-        Registry.clear_spec()
+    def test_fields(self) -> None:
+        """Test that TextModel has the correct fields."""
+        expected_payload_fields = ("text",)
+        expected_metadata_fields = ("lang", "encoding", "detected_lang_conf")
+        expected_extra_fields = "ignore"
+        expected_renames = {}
+        expected_kind = "text"
+        print(Registry.get_specs())
+        assert Registry.get_spec(TextModel).payload_fields == expected_payload_fields
+        assert Registry.get_spec(TextModel).metadata_fields == expected_metadata_fields
+        assert Registry.get_spec(TextModel).extra_fields == expected_extra_fields
+        assert Registry.get_spec(TextModel).renames == expected_renames
+        assert Registry.get_spec(TextModel).kind == expected_kind
 
+    def test_text_model_registration(self, clear_registry) -> None:
+        """Test that TextModel is properly registered with Ether."""
         # Re-register TextModel since registration happens at class definition time
         from ether.kinds import TextModel
         from ether.spec import EtherSpec
@@ -42,11 +53,8 @@ class TestTextModelRegistration:
         assert spec.metadata_fields == ("lang", "encoding", "detected_lang_conf")
         assert spec.extra_fields == "ignore"
 
-    def test_text_model_round_trip_conversion(self) -> None:
+    def test_text_model_round_trip_conversion(self, clear_registry) -> None:
         """Test round-trip conversion: TextModel -> Ether -> TextModel."""
-        # Clear registry for clean test
-        Registry.clear_spec()
-
         # Re-register TextModel
         from ether.kinds import TextModel
         from ether.spec import EtherSpec
@@ -88,11 +96,8 @@ class TestTextModelRegistration:
         assert converted_model.encoding == original_model.encoding
         assert converted_model.detected_lang_conf == original_model.detected_lang_conf
 
-    def test_text_model_minimal_fields(self) -> None:
+    def test_text_model_minimal_fields(self, clear_registry) -> None:
         """Test TextModel with only required fields."""
-        # Clear registry for clean test
-        Registry.clear_spec()
-
         # Re-register TextModel
         from ether.kinds import TextModel
         from ether.spec import EtherSpec
@@ -131,11 +136,8 @@ class TestTextModelRegistration:
         assert converted_model.encoding is None
         assert converted_model.detected_lang_conf is None
 
-    def test_text_model_constructor_with_model(self) -> None:
+    def test_text_model_constructor_with_model(self, clear_registry) -> None:
         """Test Ether constructor with TextModel."""
-        # Clear registry for clean test
-        Registry.clear_spec()
-
         # Re-register TextModel
         from ether.kinds import TextModel
         from ether.spec import EtherSpec
@@ -163,11 +165,8 @@ class TestTextModelRegistration:
         assert "trace_id" in ether.metadata
         assert "created_at" in ether.metadata
 
-    def test_text_model_require_kind_validation(self) -> None:
+    def test_text_model_require_kind_validation(self, clear_registry) -> None:
         """Test require_kind validation with TextModel."""
-        # Clear registry for clean test
-        Registry.clear_spec()
-
         # Re-register TextModel
         from ether.kinds import TextModel
         from ether.spec import EtherSpec
@@ -202,11 +201,8 @@ class TestTextModelRegistration:
             wrong_kind_ether.as_model(TextModel, require_kind=True)
         assert "Kind mismatch" in str(exc_info.value)
 
-    def test_text_model_produces_valid_schema_envelope(self) -> None:
+    def test_text_model_produces_valid_schema_envelope(self, clear_registry) -> None:
         """Test that TextModel produces Ether envelopes that validate against text.v1 schema."""
-        # Clear registry for clean test
-        Registry.clear_spec()
-
         # Re-register TextModel
         from ether.kinds import TextModel
         from ether.spec import EtherSpec
@@ -243,11 +239,8 @@ class TestTextModelRegistration:
         assert "text" in ether_dict["payload"]
         assert isinstance(ether_dict["payload"]["text"], str)
 
-    def test_text_model_strict_type_compliance(self) -> None:
+    def test_text_model_strict_type_compliance(self, clear_registry) -> None:
         """Test that TextModel strictly complies with text.v1 schema types."""
-        # Clear registry for clean test
-        Registry.clear_spec()
-
         # Re-register TextModel
         from ether.kinds import TextModel
         from ether.spec import EtherSpec
@@ -321,11 +314,8 @@ class TestTextModelRegistration:
         assert "trace_id" in ether.metadata
         assert "created_at" in ether.metadata
 
-    def test_text_model_binding_mechanism_compliance(self) -> None:
+    def test_text_model_binding_mechanism_compliance(self, clear_registry) -> None:
         """Test that TextModel follows the binding mechanism matrix requirements."""
-        # Clear registry for clean test
-        Registry.clear_spec()
-
         # Re-register TextModel
         from ether.kinds import TextModel
         from ether.spec import EtherSpec
@@ -396,11 +386,8 @@ class TestTextModelRegistration:
 class TestTextModelMisRegistration:
     """Test mis-registration scenarios for TextModel."""
 
-    def test_missing_required_field_raises_error(self) -> None:
+    def test_missing_required_field_raises_error(self, clear_registry) -> None:
         """Test that missing required field raises RegistrationError."""
-        # Clear registry for clean test
-        Registry.clear_spec()
-
         # Try to register a model with missing required field
         with pytest.raises(Exception) as exc_info:
 
@@ -411,11 +398,8 @@ class TestTextModelMisRegistration:
 
         assert "unknown field" in str(exc_info.value).lower()
 
-    def test_duplicate_field_mapping_raises_error(self) -> None:
+    def test_duplicate_field_mapping_raises_error(self, clear_registry) -> None:
         """Test that duplicate field mapping raises error."""
-        # Clear registry for clean test
-        Registry.clear_spec()
-
         # Try to register with different field names mapping to the same path
         with pytest.raises(Exception) as exc_info:
 
@@ -434,11 +418,8 @@ class TestTextModelMisRegistration:
 
         assert "duplicate mapping" in str(exc_info.value).lower()
 
-    def test_field_in_both_payload_and_metadata_raises_error(self) -> None:
+    def test_field_in_both_payload_and_metadata_raises_error(self, clear_registry) -> None:
         """Test that field in both payload and metadata raises error."""
-        # Clear registry for clean test
-        Registry.clear_spec()
-
         # Try to register with same field in both payload and metadata
         with pytest.raises(Exception) as exc_info:
 
@@ -466,10 +447,8 @@ class TestTextModelValidation:
         with pytest.raises(ValidationError):  # No confidence above 1.0
             TextModel(text="test", detected_lang_conf=1.1)
 
-    def test_text_model_extra_fields_ignored(self) -> None:
+    def test_text_model_extra_fields_ignored(self, clear_registry) -> None:
         """Test that extra fields are ignored in TextModel registration."""
-        # Clear registry for clean test
-        Registry.clear_spec()
 
         # Create a model with extra fields
         @Ether.register(payload=["text"], metadata=["lang"], extra_fields="ignore", kind="text")

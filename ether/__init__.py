@@ -101,7 +101,12 @@ class Registry(metaclass=Singleton):
         return cls._SPEC_REGISTRY
 
     @classmethod
-    def clear_spec(cls):
+    def clear_spec(cls, force: bool = False, sure: bool = False):
+        if not force and not sure:
+            raise ValueError(
+                "Are you sure you want to clear the spec registry? This is irreversible. "
+                "Use `force=True, sure=True` to bypass this check."
+            )
         cls._SPEC_REGISTRY.clear()
 
     # ----- Adapter Registry -----
@@ -121,7 +126,12 @@ class Registry(metaclass=Singleton):
         cls._ADAPTER_REGISTRY[key] = adapter
 
     @classmethod
-    def clear_adapter(cls):
+    def clear_adapter(cls, force: bool = False, sure: bool = False):
+        if not force and not sure:
+            raise ValueError(
+                "Are you sure you want to clear the adapter registry? This is irreversible. "
+                "Use `force=True, sure=True` to bypass this check."
+            )
         cls._ADAPTER_REGISTRY.clear()
 
     @classmethod

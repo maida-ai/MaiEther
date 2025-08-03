@@ -48,7 +48,9 @@ class TestGoldenFixtures:
         errors = list(validator.iter_errors(data))
         assert not errors, f"Schema validation errors: {errors}"
 
-    def test_embedding_v1_golden_fixture(self, golden_dir: pathlib.Path, schemas_dir: pathlib.Path) -> None:
+    def test_embedding_v1_golden_fixture(
+        self, golden_dir: pathlib.Path, schemas_dir: pathlib.Path, clear_registry
+    ) -> None:
         """Test embedding.v1 golden fixture validation and round-trip."""
         # Load golden fixture
         fixture_data = self.load_golden_fixture(golden_dir, "embedding_v1.json")
@@ -60,8 +62,6 @@ class TestGoldenFixtures:
         self.validate_against_schema(fixture_data, schema)
 
         # Test round-trip conversion
-        # Clear registry for clean test
-        Registry.clear_spec()
 
         # Re-register EmbeddingModel
         from ether.spec import EtherSpec
@@ -109,7 +109,7 @@ class TestGoldenFixtures:
         # Note: The round-trip may not preserve all metadata fields since they're optional
         # in the EmbeddingModel, but the core payload should be preserved
 
-    def test_text_v1_golden_fixture(self, golden_dir: pathlib.Path, schemas_dir: pathlib.Path) -> None:
+    def test_text_v1_golden_fixture(self, golden_dir: pathlib.Path, schemas_dir: pathlib.Path, clear_registry) -> None:
         """Test text.v1 golden fixture validation and round-trip."""
         # Load golden fixture
         fixture_data = self.load_golden_fixture(golden_dir, "text_v1.json")
@@ -121,9 +121,6 @@ class TestGoldenFixtures:
         self.validate_against_schema(fixture_data, schema)
 
         # Test round-trip conversion
-        # Clear registry for clean test
-        Registry.clear_spec()
-
         # Re-register TextModel
         from ether.spec import EtherSpec
 
@@ -167,7 +164,9 @@ class TestGoldenFixtures:
         assert round_trip_ether.metadata["encoding"] == "utf-8"
         assert round_trip_ether.metadata["detected_lang_conf"] == 0.95
 
-    def test_tokens_v1_golden_fixture(self, golden_dir: pathlib.Path, schemas_dir: pathlib.Path) -> None:
+    def test_tokens_v1_golden_fixture(
+        self, golden_dir: pathlib.Path, schemas_dir: pathlib.Path, clear_registry
+    ) -> None:
         """Test tokens.v1 golden fixture validation and round-trip."""
         # Load golden fixture
         fixture_data = self.load_golden_fixture(golden_dir, "tokens_v1.json")
@@ -179,8 +178,6 @@ class TestGoldenFixtures:
         self.validate_against_schema(fixture_data, schema)
 
         # Test round-trip conversion
-        # Clear registry for clean test
-        Registry.clear_spec()
 
         # Re-register TokenModel
         from ether.spec import EtherSpec
@@ -228,7 +225,9 @@ class TestGoldenFixtures:
         assert round_trip_ether.metadata["truncation"] == "longest_first"
         assert round_trip_ether.metadata["offsets"] is False
 
-    def test_golden_fixtures_with_attachments(self, golden_dir: pathlib.Path, schemas_dir: pathlib.Path) -> None:
+    def test_golden_fixtures_with_attachments(
+        self, golden_dir: pathlib.Path, schemas_dir: pathlib.Path, clear_registry
+    ) -> None:
         """Test golden fixtures with attachments for large data."""
         # Load embedding fixture and add attachment
         fixture_data = self.load_golden_fixture(golden_dir, "embedding_v1.json")
@@ -255,9 +254,6 @@ class TestGoldenFixtures:
         self.validate_against_schema(fixture_data, schema)
 
         # Test round-trip conversion with attachment
-        # Clear registry for clean test
-        Registry.clear_spec()
-
         # Re-register EmbeddingModel
         from ether.spec import EtherSpec
 

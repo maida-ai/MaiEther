@@ -3,7 +3,6 @@
 import pytest
 from pydantic import BaseModel, ValidationError
 
-from ether import Registry
 from ether.core import Ether
 from ether.errors import ConversionError, RegistrationError
 
@@ -11,10 +10,8 @@ from ether.errors import ConversionError, RegistrationError
 class TestEtherAsModel:
     """Test Ether.as_model() conversion method."""
 
-    def test_as_model_basic_conversion(self) -> None:
+    def test_as_model_basic_conversion(self, clear_registry) -> None:
         """Test basic conversion from Ether to model."""
-        # Clear registry for clean test
-        Registry.clear_spec()
 
         @Ether.register(
             payload=["embedding"],
@@ -39,10 +36,8 @@ class TestEtherAsModel:
         assert model.embedding == [1.0, 2.0, 3.0]
         assert model.source == "bert"
 
-    def test_as_model_with_renames(self) -> None:
+    def test_as_model_with_renames(self, clear_registry) -> None:
         """Test as_model with field renames."""
-        # Clear registry for clean test
-        Registry.clear_spec()
 
         @Ether.register(
             payload=["embedding"],
@@ -71,7 +66,7 @@ class TestEtherAsModel:
         assert model.embedding == [1.0, 2.0]
         assert model.source == "bert"
 
-    def test_as_model_unregistered_model_raises_error(self) -> None:
+    def test_as_model_unregistered_model_raises_error(self, clear_registry) -> None:
         """Test that as_model raises error for unregistered model."""
 
         class UnregisteredModel(BaseModel):
@@ -82,10 +77,8 @@ class TestEtherAsModel:
         with pytest.raises(RegistrationError, match="UnregisteredModel not registered"):
             ether.as_model(UnregisteredModel)
 
-    def test_as_model_missing_required_fields_raises_error(self) -> None:
+    def test_as_model_missing_required_fields_raises_error(self, clear_registry) -> None:
         """Test that as_model raises error for missing required fields."""
-        # Clear registry for clean test
-        Registry.clear_spec()
 
         @Ether.register(payload=["embedding"], metadata=["source"], kind="embedding")
         class TargetModel(BaseModel):
@@ -102,10 +95,8 @@ class TestEtherAsModel:
         with pytest.raises(ConversionError, match="Missing required fields"):
             ether.as_model(TargetModel)
 
-    def test_as_model_require_kind_mismatch_raises_error(self) -> None:
+    def test_as_model_require_kind_mismatch_raises_error(self, clear_registry) -> None:
         """Test that as_model with require_kind=True raises error for kind mismatch."""
-        # Clear registry for clean test
-        Registry.clear_spec()
 
         @Ether.register(payload=["data"], metadata=[], kind="type1")
         class TargetModel(BaseModel):
@@ -120,10 +111,8 @@ class TestEtherAsModel:
         with pytest.raises(ConversionError, match="Kind mismatch"):
             ether.as_model(TargetModel, require_kind=True)
 
-    def test_as_model_require_kind_success(self) -> None:
+    def test_as_model_require_kind_success(self, clear_registry) -> None:
         """Test that as_model with require_kind=True succeeds for matching kinds."""
-        # Clear registry for clean test
-        Registry.clear_spec()
 
         @Ether.register(payload=["data"], metadata=[], kind="test")
         class TargetModel(BaseModel):
@@ -139,11 +128,8 @@ class TestEtherAsModel:
 
         assert model.data == "test"
 
-    def test_as_model_with_adapter(self) -> None:
+    def test_as_model_with_adapter(self, clear_registry) -> None:
         """Test as_model using adapter function."""
-        # Clear registries for clean test
-        Registry.clear_spec()
-        Registry.clear_adapter()
 
         @Ether.register(payload=["embedding"], metadata=["source"], kind="embedding")
         class SourceModel(BaseModel):
@@ -168,10 +154,8 @@ class TestEtherAsModel:
         # Verify conversion
         assert target_model.count == 3
 
-    def test_as_model_from_extra_fields(self) -> None:
+    def test_as_model_from_extra_fields(self, clear_registry) -> None:
         """Test as_model picking fields from extra_fields."""
-        # Clear registry for clean test
-        Registry.clear_spec()
 
         @Ether.register(payload=["data"], metadata=[], kind="test")
         class TargetModel(BaseModel):
@@ -190,10 +174,8 @@ class TestEtherAsModel:
         assert model.data == "test"
         assert model.extra_field == "extra_value"
 
-    def test_as_model_round_trip(self) -> None:
+    def test_as_model_round_trip(self, clear_registry) -> None:
         """Test round-trip conversion: Model -> Ether -> Model."""
-        # Clear registry for clean test
-        Registry.clear_spec()
 
         @Ether.register(
             payload=["embedding", "dim"],
@@ -223,10 +205,8 @@ class TestEtherAsModel:
         assert restored.dim == original.dim
         assert restored.note == original.note
 
-    def test_as_model_pick_from_extras_by_renamed_key(self) -> None:
+    def test_as_model_pick_from_extras_by_renamed_key(self, clear_registry) -> None:
         """Test as_model picking fields from extras using renamed keys."""
-        # Clear registry for clean test
-        Registry.clear_spec()
 
         @Ether.register(
             payload=["data"],
@@ -249,10 +229,8 @@ class TestEtherAsModel:
 
         assert model.data == "test_value"
 
-    def test_as_model_pick_from_extras_by_model_field_name(self) -> None:
+    def test_as_model_pick_from_extras_by_model_field_name(self, clear_registry) -> None:
         """Test as_model picking fields from extras using model field name."""
-        # Clear registry for clean test
-        Registry.clear_spec()
 
         @Ether.register(
             payload=["data"],
@@ -275,10 +253,8 @@ class TestEtherAsModel:
 
         assert model.data == "test_value"
 
-    def test_as_model_validation_error_without_missing_fields(self) -> None:
+    def test_as_model_validation_error_without_missing_fields(self, clear_registry) -> None:
         """Test as_model when ValidationError occurs but no fields are missing."""
-        # Clear registry for clean test
-        Registry.clear_spec()
 
         @Ether.register(payload=["data"], metadata=[], kind="test")
         class TargetModel(BaseModel):
@@ -295,10 +271,8 @@ class TestEtherAsModel:
         with pytest.raises(ValidationError):
             ether.as_model(TargetModel)
 
-    def test_as_model_pick_returns_false_when_field_not_found(self) -> None:
+    def test_as_model_pick_returns_false_when_field_not_found(self, clear_registry) -> None:
         """Test as_model when pick function returns False, None for missing fields."""
-        # Clear registry for clean test
-        Registry.clear_spec()
 
         @Ether.register(payload=["data"], metadata=[], kind="test")
         class TargetModel(BaseModel):
@@ -317,10 +291,8 @@ class TestEtherAsModel:
         with pytest.raises(ConversionError, match="Missing required fields"):
             ether.as_model(TargetModel)
 
-    def test_as_model_pick_returns_false_for_optional_field(self) -> None:
+    def test_as_model_pick_returns_false_for_optional_field(self, clear_registry) -> None:
         """Test as_model when pick function returns False, None for optional fields."""
-        # Clear registry for clean test
-        Registry.clear_spec()
 
         @Ether.register(payload=["data"], metadata=[], kind="test")
         class TargetModel(BaseModel):
@@ -340,10 +312,8 @@ class TestEtherAsModel:
         assert model.data == "test"
         assert model.optional_field is None
 
-    def test_as_model_pick_returns_false_for_renamed_field_not_in_sources(self) -> None:
+    def test_as_model_pick_returns_false_for_renamed_field_not_in_sources(self, clear_registry) -> None:
         """Test as_model when pick function returns False, None for renamed field not in any source."""
-        # Clear registry for clean test
-        Registry.clear_spec()
 
         @Ether.register(
             payload=["data"], metadata=[], renames={"data": "payload.data", "missing": "payload.missing"}, kind="test"
@@ -365,10 +335,8 @@ class TestEtherAsModel:
         assert model.data == "test"
         assert model.missing is None
 
-    def test_as_model_pick_returns_false_for_metadata_field_not_found(self) -> None:
+    def test_as_model_pick_returns_false_for_metadata_field_not_found(self, clear_registry) -> None:
         """Test as_model when pick function returns False, None for metadata field not found."""
-        # Clear registry for clean test
-        Registry.clear_spec()
 
         @Ether.register(
             payload=["data"], metadata=["metadata_field"], renames={"metadata_field": "meta.field"}, kind="test"

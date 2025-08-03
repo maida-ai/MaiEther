@@ -94,7 +94,15 @@ class EtherSpec:
             ... )
         """
         # Convert renames to dict if None
-        object.__setattr__(self, "renames", dict(self.renames or {}))
+        # We also cleanup the renames to remove self-references
+        self.renames = dict(self.renames or {})
+        self_keys = []
+        for key, value in self.renames.items():
+            if key == value:
+                self_keys.append(key)
+        for key in self_keys:
+            self.renames.pop(key)
+        object.__setattr__(self, "renames", self.renames)
 
         # Check for fields in both payload and metadata
         dup = set(self.payload_fields) & set(self.metadata_fields)

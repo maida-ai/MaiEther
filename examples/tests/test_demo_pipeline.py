@@ -18,10 +18,8 @@ from examples.demo.nodes.tokenizer import TokenizerNode
 class TestDemoPipeline:
     """Test the complete demo pipeline integration."""
 
-    def setup_method(self) -> None:
+    def setup_method(self, clear_registry) -> None:
         """Set up test method by registering required models."""
-        # Clear registry for clean test
-        Registry.clear_spec()
 
         # Register TextModel
         text_spec = EtherSpec(

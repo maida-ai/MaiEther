@@ -15,10 +15,8 @@ from tests.kinds import SCHEMAS_DIR
 class TestTokenModelRegistration:
     """Test TokenModel registration with Ether."""
 
-    def test_token_model_registration(self) -> None:
+    def test_token_model_registration(self, clear_registry) -> None:
         """Test that TokenModel is properly registered with Ether."""
-        # Clear registry for clean test
-        Registry.clear_spec()
 
         # Re-register TokenModel since registration happens at class definition time
         from ether.spec import EtherSpec
@@ -41,10 +39,8 @@ class TestTokenModelRegistration:
         assert spec.metadata_fields == ("vocab", "truncation", "offsets")
         assert spec.extra_fields == "ignore"
 
-    def test_token_model_round_trip_conversion(self) -> None:
+    def test_token_model_round_trip_conversion(self, clear_registry) -> None:
         """Test round-trip conversion: TokenModel -> Ether -> TokenModel."""
-        # Clear registry for clean test
-        Registry.clear_spec()
 
         # Re-register TokenModel
         from ether.spec import EtherSpec
@@ -93,10 +89,8 @@ class TestTokenModelRegistration:
         assert converted_model.truncation == original_model.truncation
         assert converted_model.offsets == original_model.offsets
 
-    def test_token_model_minimal_fields(self) -> None:
+    def test_token_model_minimal_fields(self, clear_registry) -> None:
         """Test TokenModel with only required fields."""
-        # Clear registry for clean test
-        Registry.clear_spec()
 
         # Re-register TokenModel
         from ether.spec import EtherSpec
@@ -136,10 +130,8 @@ class TestTokenModelRegistration:
         assert converted_model.truncation is None
         assert converted_model.offsets is None
 
-    def test_token_model_constructor_with_model(self) -> None:
+    def test_token_model_constructor_with_model(self, clear_registry) -> None:
         """Test Ether constructor with TokenModel."""
-        # Clear registry for clean test
-        Registry.clear_spec()
 
         # Re-register TokenModel
         from ether.spec import EtherSpec
@@ -167,10 +159,8 @@ class TestTokenModelRegistration:
         assert "trace_id" in ether.metadata
         assert "created_at" in ether.metadata
 
-    def test_token_model_require_kind_validation(self) -> None:
+    def test_token_model_require_kind_validation(self, clear_registry) -> None:
         """Test require_kind validation with TokenModel."""
-        # Clear registry for clean test
-        Registry.clear_spec()
 
         # Re-register TokenModel
         from ether.spec import EtherSpec
@@ -200,10 +190,8 @@ class TestTokenModelRegistration:
             wrong_kind_ether.as_model(TokenModel, require_kind=True)
         assert "Kind mismatch" in str(exc_info.value)
 
-    def test_token_model_produces_valid_schema_envelope(self) -> None:
+    def test_token_model_produces_valid_schema_envelope(self, clear_registry) -> None:
         """Test that TokenModel produces Ether envelopes that validate against tokens.v1 schema."""
-        # Clear registry for clean test
-        Registry.clear_spec()
 
         # Re-register TokenModel
         from ether.spec import EtherSpec
@@ -248,10 +236,8 @@ class TestTokenModelRegistration:
         assert "vocab" in ether_dict["metadata"]
         assert isinstance(ether_dict["metadata"]["vocab"], str)
 
-    def test_token_model_strict_type_compliance(self) -> None:
+    def test_token_model_strict_type_compliance(self, clear_registry) -> None:
         """Test that TokenModel strictly complies with tokens.v1 schema types."""
-        # Clear registry for clean test
-        Registry.clear_spec()
 
         # Re-register TokenModel
         from ether.spec import EtherSpec
@@ -333,10 +319,8 @@ class TestTokenModelRegistration:
         assert "trace_id" in ether.metadata
         assert "created_at" in ether.metadata
 
-    def test_token_model_binding_mechanism_compliance(self) -> None:
+    def test_token_model_binding_mechanism_compliance(self, clear_registry) -> None:
         """Test that TokenModel follows the binding mechanism matrix requirements."""
-        # Clear registry for clean test
-        Registry.clear_spec()
 
         # Re-register TokenModel
         from ether.spec import EtherSpec
@@ -416,10 +400,8 @@ class TestTokenModelRegistration:
 class TestTokenModelMisRegistration:
     """Test mis-registration scenarios for TokenModel."""
 
-    def test_missing_required_field_raises_error(self) -> None:
+    def test_missing_required_field_raises_error(self, clear_registry) -> None:
         """Test that missing required field raises RegistrationError."""
-        # Clear registry for clean test
-        Registry.clear_spec()
 
         # Try to register a model with missing required field
         with pytest.raises(Exception) as exc_info:
@@ -431,10 +413,8 @@ class TestTokenModelMisRegistration:
 
         assert "unknown field" in str(exc_info.value).lower()
 
-    def test_duplicate_field_mapping_raises_error(self) -> None:
+    def test_duplicate_field_mapping_raises_error(self, clear_registry) -> None:
         """Test that duplicate field mapping raises error."""
-        # Clear registry for clean test
-        Registry.clear_spec()
 
         # Try to register with different field names mapping to the same path
         with pytest.raises(Exception) as exc_info:
@@ -454,10 +434,8 @@ class TestTokenModelMisRegistration:
 
         assert "duplicate mapping" in str(exc_info.value).lower()
 
-    def test_field_in_both_payload_and_metadata_raises_error(self) -> None:
+    def test_field_in_both_payload_and_metadata_raises_error(self, clear_registry) -> None:
         """Test that field in both payload and metadata raises error."""
-        # Clear registry for clean test
-        Registry.clear_spec()
 
         # Try to register with same field in both payload and metadata
         with pytest.raises(Exception) as exc_info:
@@ -472,10 +450,8 @@ class TestTokenModelMisRegistration:
 class TestTokenModelValidation:
     """Test TokenModel field validation."""
 
-    def test_token_model_extra_fields_ignored(self) -> None:
+    def test_token_model_extra_fields_ignored(self, clear_registry) -> None:
         """Test that extra fields are ignored in TokenModel registration."""
-        # Clear registry for clean test
-        Registry.clear_spec()
 
         # Create a model with extra fields
         @Ether.register(payload=["ids"], metadata=["vocab"], extra_fields="ignore", kind="tokens")
@@ -497,10 +473,8 @@ class TestTokenModelValidation:
 class TestTokenModelNegativeTests:
     """Test negative scenarios for TokenModel."""
 
-    def test_omit_vocab_raises_validation_error(self) -> None:
+    def test_omit_vocab_raises_validation_error(self, clear_registry) -> None:
         """Test that omitting vocab raises ValidationError then ConversionError."""
-        # Clear registry for clean test
-        Registry.clear_spec()
 
         # Re-register TokenModel
         from ether.spec import EtherSpec
@@ -533,10 +507,8 @@ class TestTokenModelNegativeTests:
             ether_without_vocab.as_model(TokenModel)
         assert "vocab" in str(exc_info.value).lower()
 
-    def test_omit_ids_raises_validation_error(self) -> None:
+    def test_omit_ids_raises_validation_error(self, clear_registry) -> None:
         """Test that omitting ids raises ValidationError."""
-        # Clear registry for clean test
-        Registry.clear_spec()
 
         # Re-register TokenModel
         from ether.spec import EtherSpec
@@ -555,10 +527,8 @@ class TestTokenModelNegativeTests:
             TokenModel(vocab="gpt2")  # Missing ids
         assert "ids" in str(exc_info.value).lower()
 
-    def test_invalid_ids_type_raises_validation_error(self) -> None:
+    def test_invalid_ids_type_raises_validation_error(self, clear_registry) -> None:
         """Test that invalid ids type raises ValidationError."""
-        # Clear registry for clean test
-        Registry.clear_spec()
 
         # Re-register TokenModel
         from ether.spec import EtherSpec
@@ -581,10 +551,8 @@ class TestTokenModelNegativeTests:
             TokenModel(ids=["not", "integers"], vocab="gpt2")  # ids should be list[int]
         assert "validation error" in str(exc_info.value).lower()
 
-    def test_invalid_vocab_type_raises_validation_error(self) -> None:
+    def test_invalid_vocab_type_raises_validation_error(self, clear_registry) -> None:
         """Test that invalid vocab type raises ValidationError."""
-        # Clear registry for clean test
-        Registry.clear_spec()
 
         # Re-register TokenModel
         from ether.spec import EtherSpec

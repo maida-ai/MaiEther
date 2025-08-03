@@ -13,7 +13,7 @@ class TestTokenizerNode:
     def setup_method(self) -> None:
         """Set up test method by registering required models."""
         # Clear registry for clean test
-        Registry.clear_spec()
+        Registry.clear_spec(force=True, sure=True)
 
         # Register TextModel
         text_spec = EtherSpec(

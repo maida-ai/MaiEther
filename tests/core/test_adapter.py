@@ -9,10 +9,8 @@ from ether.core import Ether
 class TestEtherAdapter:
     """Test Ether adapter registration functionality."""
 
-    def test_adapter_registration(self) -> None:
+    def test_adapter_registration(self, clear_registry) -> None:
         """Test registering an adapter function."""
-        # Clear registry for clean test
-        Registry.clear_adapter()
 
         class SourceModel(BaseModel):
             field1: str
@@ -29,10 +27,8 @@ class TestEtherAdapter:
         assert (SourceModel, DestModel) in Registry.get_adapters()
         assert Registry.get_adapter(SourceModel, DestModel) == source_to_dest
 
-    def test_adapter_decorator_returns_function(self) -> None:
+    def test_adapter_decorator_returns_function(self, clear_registry) -> None:
         """Test that the adapter decorator returns the function."""
-        # Clear registry for clean test
-        Registry.clear_adapter()
 
         class SourceModel(BaseModel):
             field1: str

@@ -3,17 +3,14 @@
 import pytest
 from pydantic import BaseModel
 
-from ether import Registry
 from ether.core import Ether
 
 
 class TestEtherConstructorWithModel:
     """Test Ether constructor with model argument."""
 
-    def test_ether_constructor_with_model(self) -> None:
+    def test_ether_constructor_with_model(self, clear_registry) -> None:
         """Test Ether constructor with model argument."""
-        # Clear registry for clean test
-        Registry.clear_spec()
 
         @Ether.register(payload=["data"], metadata=[], kind="test")
         class TestModel(BaseModel):
