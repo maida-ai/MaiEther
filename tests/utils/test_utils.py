@@ -4,7 +4,7 @@ from datetime import datetime, timedelta
 
 import pytest
 
-from ether.utils import _Guard, rfc3339_now
+from ether.utils import _Guard, final, rfc3339_now
 
 
 class TestRfc3339Now:
@@ -48,10 +48,10 @@ class TestGuard:
     """Test the _Guard metaclass for access control."""
 
     def test_final_method_decorator(self) -> None:
-        """Test that @_Guard.final decorator works correctly."""
+        """Test that @final decorator works correctly."""
 
         class Parent(metaclass=_Guard):
-            @_Guard.final
+            @final
             def final_method(self) -> str:
                 return "parent"
 
@@ -66,7 +66,7 @@ class TestGuard:
         """Test that final methods cannot be overridden in subclasses."""
 
         class Parent(metaclass=_Guard):
-            @_Guard.final
+            @final
             def final_method(self) -> str:
                 return "parent"
 
@@ -96,12 +96,12 @@ class TestGuard:
         """Test that final methods from multiple base classes are protected."""
 
         class Base1(metaclass=_Guard):
-            @_Guard.final
+            @final
             def method1(self) -> str:
                 return "base1"
 
         class Base2(metaclass=_Guard):
-            @_Guard.final
+            @final
             def method2(self) -> str:
                 return "base2"
 
@@ -125,11 +125,11 @@ class TestGuard:
         """Test that final methods with different names don't conflict."""
 
         class Parent(metaclass=_Guard):
-            @_Guard.final
+            @final
             def method1(self) -> str:
                 return "method1"
 
-            @_Guard.final
+            @final
             def method2(self) -> str:
                 return "method2"
 
@@ -145,7 +145,7 @@ class TestGuard:
         """Test that final methods are protected in deep inheritance chains."""
 
         class Base(metaclass=_Guard):
-            @_Guard.final
+            @final
             def final_method(self) -> str:
                 return "base"
 
@@ -166,7 +166,7 @@ class TestGuard:
         """Test that final methods with parameters work correctly."""
 
         class Parent(metaclass=_Guard):
-            @_Guard.final
+            @final
             def final_method(self, param: str) -> str:
                 return f"parent_{param}"
 
@@ -189,7 +189,7 @@ class TestGuard:
             def normal_property(self) -> str:
                 return "property"
 
-            @_Guard.final
+            @final
             def final_method(self) -> str:
                 return "final"
 
@@ -211,7 +211,7 @@ class TestGuard:
             def static_method() -> str:
                 return "static"
 
-            @_Guard.final
+            @final
             def final_method(self) -> str:
                 return "final"
 
@@ -233,7 +233,7 @@ class TestGuard:
             def class_method(cls) -> str:
                 return "class"
 
-            @_Guard.final
+            @final
             def final_method(self) -> str:
                 return "final"
 
@@ -256,7 +256,7 @@ class TestGuard:
             def abstract_method(self) -> str:
                 pass
 
-            @_Guard.final
+            @final
             def final_method(self) -> str:
                 return "final"
 
@@ -273,12 +273,12 @@ class TestGuard:
         """Test that final decorator works with other decorators."""
 
         class Parent(metaclass=_Guard):
-            @_Guard.final
+            @final
             @staticmethod
             def static_final() -> str:
                 return "static_final"
 
-            @_Guard.final
+            @final
             @classmethod
             def class_final(cls) -> str:
                 return "class_final"
@@ -299,7 +299,7 @@ class TestGuard:
         """Test that new methods can be added alongside final methods."""
 
         class Parent(metaclass=_Guard):
-            @_Guard.final
+            @final
             def final_method(self) -> str:
                 return "final"
 
@@ -326,7 +326,7 @@ class TestGuard:
             def __init__(self):
                 self.attr = "value"
 
-            @_Guard.final
+            @final
             def final_method(self) -> str:
                 return "final"
 
@@ -348,7 +348,7 @@ class TestGuard:
 
         # This should work - _Guard should be the primary metaclass
         class Parent(metaclass=_Guard):
-            @_Guard.final
+            @final
             def final_method(self) -> str:
                 return "final"
 
@@ -364,7 +364,7 @@ class TestGuard:
                 return "normal"
 
         class GuardParent(metaclass=_Guard):
-            @_Guard.final
+            @final
             def final_method(self) -> str:
                 return "final"
 
@@ -388,11 +388,11 @@ class TestGuard:
         """Test that is_final() works correctly."""
 
         class Parent(metaclass=_Guard):
-            @_Guard.final
+            @final
             def final_method(self) -> str:
                 return "final"
 
-            @_Guard.final  # type: ignore[prop-decorator]
+            @final  # type: ignore[prop-decorator]
             @property
             def final_property(self) -> str:
                 return "final"
@@ -414,7 +414,7 @@ class TestGuard:
 
         class Parent(metaclass=_Guard):
             @property
-            @_Guard.final
+            @final
             def final_pre_property(self) -> str:
                 return "final"
 
@@ -437,8 +437,8 @@ class TestGuard:
             def final_property(self, value: str) -> None:
                 pass
 
-            @_Guard.final
-            @final_property.deleter  # type: ignore[name-defined]
+            @final  # type: ignore[misc]
+            @final_property.deleter
             def final_property(self) -> None:
                 pass
 

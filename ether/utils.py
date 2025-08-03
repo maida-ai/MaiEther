@@ -22,6 +22,15 @@ def rfc3339_now() -> str:
     return datetime.now(UTC).isoformat(timespec="microseconds").replace("+00:00", "Z")
 
 
+def final(obj: Any) -> Any:
+    """Mark a method or property as final (non-overridable).
+
+    - If decorating a function (or class/staticmethod), the mark is set on the function.
+    - If decorating a property object, the mark is set on any available accessor(s).
+    """
+    return _Guard.final(obj)
+
+
 class _Guard(ABCMeta):
     """Metaclass that prevents overriding members marked as final, including properties.
 
