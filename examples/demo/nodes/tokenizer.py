@@ -8,9 +8,9 @@ The TokenizerNode accepts text.v1 envelopes and emits tokens.v1 envelopes
 with token IDs generated via hash-based mapping.
 """
 
-from ..core import Ether
-from ..kinds import TextModel, TokenModel
-from ..node import Node
+from ether.core import Ether
+from ether.kinds import TextModel, TokenModel
+from ether.node import Node
 
 
 class TokenizerNode(Node):

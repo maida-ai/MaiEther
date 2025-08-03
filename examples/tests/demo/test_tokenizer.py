@@ -2,9 +2,9 @@
 
 import pytest
 
+from examples.demo.nodes.tokenizer import TokenizerNode
 from ether import Ether, TextModel, TokenModel
 from ether.core import _spec_registry
-from ether.nodes.tokenizer import TokenizerNode
 from ether.spec import EtherSpec
 
 

@@ -10,9 +10,9 @@ with fixed-dimension random vectors generated using numpy.random.RandomState(42)
 
 import numpy as np
 
-from ..core import Ether
-from ..kinds import EmbeddingModel
-from ..node import Node
+from ether.core import Ether
+from ether.kinds import EmbeddingModel
+from ether.node import Node
 
 
 class EmbedderNode(Node):
