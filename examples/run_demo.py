@@ -14,6 +14,7 @@ import time
 
 from demo.nodes.embedder import EmbedderNode
 from demo.nodes.tokenizer import TokenizerNode
+
 from ether import Ether, TextModel
 
 
@@ -37,7 +38,7 @@ def print_summary(eth: Ether, step_name: str) -> None:
     if "lineage" in eth.metadata:
         print(f"Lineage Length: {len(eth.metadata['lineage'])}")
         for i, entry in enumerate(eth.metadata["lineage"]):
-            print(f"  {i+1}. {entry['node']} v{entry['version']} at {entry['ts']}")
+            print(f"  {i + 1}. {entry['node']} v{entry['version']} at {entry['ts']}")
 
 
 def main() -> None:
