@@ -7,6 +7,7 @@ omit =
     */__pycache__/*
     */migrations/*
     examples/run_*
+    ether/__init__.py
 
 [report]
 exclude_lines =
