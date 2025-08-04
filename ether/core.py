@@ -36,9 +36,9 @@ from pydantic import BaseModel, Field, PrivateAttr, ValidationError
 from ether import Registry
 
 from ._attachment.attachment_model import Attachment
+from ._spec.ether_spec import EtherSpec
 from ._view.model_view import ModelView
 from .errors import ConversionError, RegistrationError
-from .spec import EtherSpec
 from .utils import rfc3339_now
 
 ModelT = TypeVar("ModelT", bound=BaseModel)

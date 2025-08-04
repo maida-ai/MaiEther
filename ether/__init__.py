@@ -149,8 +149,8 @@ class Registry(metaclass=Singleton):
 
 from ._attachment.attachment_model import Attachment
 from ._node.node import Node
+from ._spec.ether_spec import EtherSpec
 from ._view.model_view import ModelView
 from .core import Ether
 from .errors import ConversionError, RegistrationError
 from .kinds import EmbeddingModel, TextModel, TokenModel
-from .spec import EtherSpec
