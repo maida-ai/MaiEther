@@ -25,7 +25,7 @@ class TestEtherAdapter:
         # Verify adapter was registered
         assert len(Registry.get_adapters()) == 1
         assert (SourceModel, DestModel) in Registry.get_adapters()
-        assert Registry.get_adapter(SourceModel, DestModel) == source_to_dest
+        assert Registry.get_adapter((SourceModel, DestModel)) == source_to_dest
 
     def test_adapter_decorator_returns_function(self, clear_registry) -> None:
         """Test that the adapter decorator returns the function."""

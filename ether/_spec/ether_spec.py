@@ -38,10 +38,15 @@ Examples:
 
 from collections.abc import Mapping
 from dataclasses import dataclass
+from typing import Generic, TypeVar
+
+from pydantic import BaseModel
+
+ModelType = TypeVar("ModelType", bound=BaseModel)
 
 
 @dataclass
-class EtherSpec:
+class EtherSpec(Generic[ModelType]):
     """Defines how model fields map to Ether envelope payload and metadata sections.
 
     This dataclass specifies which model fields should be mapped to the payload

@@ -4,10 +4,57 @@ This module contains shared utility functions that can be used across
 different modules in the Ether package.
 """
 
+import inspect
 from abc import ABCMeta
+from collections.abc import Callable
 from datetime import UTC, datetime
 from types import FunctionType
-from typing import Any
+from typing import Any, get_type_hints
+
+from ether.errors import ErrorStatus
+
+
+def has_valid_arg_types(
+    fn: Callable,
+    expected_types: list[str],
+    allow_extra: bool = False,
+) -> ErrorStatus:
+    """Check if a function has valid argument types."""
+    is_passing = ErrorStatus(success=True, message="<PASSING>")
+
+    sig = inspect.signature(fn)
+    params = list(sig.parameters.values())
+    type_hints = get_type_hints(fn, globals(), locals())
+    is_passing.metadata["params"] = [
+        {
+            "name": p.name,
+            "annotation": p.annotation,
+            "type": type_hints.get(p.name, None),
+            "default": p.default,
+        }
+        for p in params
+    ]
+    if not allow_extra and len(params) != len(expected_types):
+        is_passing.success = False
+        is_passing.message = f"Expected {len(expected_types)} arguments, got {len(params)}"
+        return is_passing
+
+    for idx, param in enumerate(is_passing.metadata["params"]):
+        arg_name = param["name"]
+        arg_type = param["type"]
+        arg_type_str = arg_type.__name__ if arg_type is not None else None
+
+        if arg_type is None:
+            is_passing.success = False
+            is_passing.message = f"Missing type hint for {arg_name}"
+            return is_passing
+        elif arg_type_str is not None and "." not in expected_types[idx]:  # Match only the class name
+            arg_type_str = arg_type_str.split(".")[-1]
+        if arg_type_str != expected_types[idx]:
+            is_passing.success = False
+            is_passing.message = f"Expected {expected_types[idx]} for {arg_name}, got {arg_type_str}"
+            return is_passing
+    return is_passing
 
 
 def rfc3339_now() -> str:

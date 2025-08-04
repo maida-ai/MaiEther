@@ -22,10 +22,10 @@ from typing import Any
 
 from pydantic import BaseModel, Field
 
-from .core import Ether
+from ether._registry.registry import register_spec
 
 
-@Ether.register(
+@register_spec(
     payload=["text"],
     metadata=["lang", "encoding", "detected_lang_conf"],
     extra_fields="ignore",
@@ -95,7 +95,7 @@ class TextModel(BaseModel):
     )
 
 
-@Ether.register(
+@register_spec(
     payload=["ids", "mask"],
     metadata=["vocab", "truncation", "offsets"],
     extra_fields="ignore",
@@ -170,7 +170,7 @@ class TokenModel(BaseModel):
     offsets: bool | None = Field(default=None, description="Whether character offsets are included")
 
 
-@Ether.register(
+@register_spec(
     payload=["values", "dim"],
     metadata=["source", "norm", "quantized", "dtype", "codec"],
     extra_fields="ignore",

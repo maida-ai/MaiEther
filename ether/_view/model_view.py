@@ -30,7 +30,7 @@ from typing import TYPE_CHECKING, Any, Generic, TypeVar
 
 from pydantic import BaseModel
 
-from ether import Registry
+from ether._registry.registry import Registry
 
 if TYPE_CHECKING:
     from ether.core import Ether

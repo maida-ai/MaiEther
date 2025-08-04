@@ -33,10 +33,8 @@ from typing import Any, TypeVar
 
 from pydantic import BaseModel, Field, PrivateAttr, ValidationError
 
-from ether import Registry
-
 from ._attachment.attachment_model import Attachment
-from ._spec.ether_spec import EtherSpec
+from ._registry.registry import Registry, register_adapter
 from ._view.model_view import ModelView
 from .errors import ConversionError, RegistrationError
 from .utils import rfc3339_now
@@ -225,32 +223,12 @@ class Ether(BaseModel):
             ...     dim: int
             ...     note: str = "extra"
         """
+        from ._registry.registry import register_spec as _register_spec
 
-        def _decorator(model_cls: type[BaseModel]) -> type[BaseModel]:
-            # Validate that all specified fields exist in the model
-            known = set(getattr(model_cls, "model_fields", {}).keys())
-            for field in list(payload) + list(metadata):
-                if known and field not in known:
-                    raise RegistrationError(f"{model_cls.__name__}: unknown field '{field}'")
-
-            # Create EtherSpec and register it
-            spec = EtherSpec(
-                tuple(payload),
-                tuple(metadata),
-                extra_fields,
-                dict(renames or {}),
-                kind,
-            )
-            # Registry.set_spec(model_cls, spec)
-            Registry.register_spec(model_cls, spec)
-            return model_cls
-
-        return _decorator
+        return _register_spec(payload=payload, metadata=metadata, extra_fields=extra_fields, renames=renames, kind=kind)
 
     @classmethod
-    def adapter(
-        cls, src: type[BaseModel], dst: type[BaseModel]
-    ) -> Callable[[Callable[["Ether"], dict]], Callable[["Ether"], dict]]:
+    def adapter(cls, src: type[BaseModel], dst: type[BaseModel]) -> Callable[[Callable], Callable]:
         """Register an adapter function for converting between models.
 
         This decorator registers an adapter function that can convert from one
@@ -270,11 +248,7 @@ class Ether(BaseModel):
             ...     return {"source": eth.metadata.get("source", "unknown"), "bar_field": len(vals)}
         """
 
-        def _decorator(fn: Callable[["Ether"], dict]) -> Callable[["Ether"], dict]:
-            Registry.register_adapter((src, dst), fn)
-            return fn
-
-        return _decorator
+        return register_adapter(src=src, dst=dst)
 
     @classmethod
     def from_model(cls, model_instance: BaseModel, *, schema_version: int = 1) -> "Ether":
@@ -306,7 +280,7 @@ class Ether(BaseModel):
             True
         """
         spec = Registry.get_spec(type(model_instance))
-        if not spec:
+        if spec is None:
             raise RegistrationError(f"{type(model_instance).__name__} not registered")
 
         data = model_instance.model_dump()
@@ -418,7 +392,7 @@ class Ether(BaseModel):
             True
         """
         spec = Registry.get_spec(target_model)
-        if not spec:
+        if spec is None:
             raise RegistrationError(f"{target_model.__name__} not registered")
 
         if require_kind and spec.kind and self.kind and spec.kind != self.kind:
@@ -426,8 +400,8 @@ class Ether(BaseModel):
 
         # adapter path
         if self._source_model is not None:
-            adapter = Registry.get_adapter(self._source_model, target_model)
-            if adapter:
+            adapter = Registry.get_adapter((self._source_model, target_model))
+            if adapter is not None:
                 return target_model.model_validate(adapter(self))  # type: ignore[no-any-return]
 
         # default field picking
