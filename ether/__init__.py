@@ -141,11 +141,13 @@ class Registry(metaclass=Singleton):
 
 
 # --- Imports come last ---
+# We will try importing from the "private" subpackages
+# directly to avoid circular imports.
 
+from ._view.model_view import ModelView
 from .attachment import Attachment
 from .core import Ether
 from .errors import ConversionError, RegistrationError
 from .kinds import EmbeddingModel, TextModel, TokenModel
 from .node import Node
 from .spec import EtherSpec
-from .view import ModelView

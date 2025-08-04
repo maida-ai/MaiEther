@@ -33,9 +33,9 @@ from typing import Any, TypeVar
 
 from pydantic import BaseModel, Field, PrivateAttr, ValidationError
 
-import ether
 from ether import Registry
 
+from ._view.model_view import ModelView
 from .attachment import Attachment
 from .errors import ConversionError, RegistrationError
 from .spec import EtherSpec
@@ -484,7 +484,7 @@ class Ether(BaseModel):
                 ) from ve
             raise ve
 
-    def view_model(self, target_model: BaseModel) -> "ether.ModelView[BaseModel]":
+    def view_model(self, target_model: BaseModel) -> "ModelView[BaseModel]":
         """Create a lazy view for accessing model data without expensive copies.
 
         This method creates a ModelView that provides attribute-based access to
@@ -506,8 +506,6 @@ class Ether(BaseModel):
             >>> view.lang  # Returns "en" without copying
             >>> model = view.as_model()  # Convert back to model when needed
         """
-        from .view import ModelView
-
         return ModelView[target_model](self)
 
     def summary(self) -> dict[str, Any]:
