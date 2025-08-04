@@ -34,9 +34,9 @@ from typing import Any, TypeVar
 from pydantic import BaseModel, Field, PrivateAttr, ValidationError
 
 from ._attachment.attachment_model import Attachment
+from ._errors.errors import ConversionError, RegistrationError
 from ._registry.registry import Registry, register_adapter
 from ._view.model_view import ModelView
-from .errors import ConversionError, RegistrationError
 from .utils import rfc3339_now
 
 ModelT = TypeVar("ModelT", bound=BaseModel)

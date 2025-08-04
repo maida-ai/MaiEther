@@ -3,13 +3,13 @@ from typing import TYPE_CHECKING, Any, Protocol, runtime_checkable
 
 from pydantic import BaseModel  # Must be imported at runtime for type checks
 
-from ether.errors import RegistrationError
-
 if TYPE_CHECKING:
     # Keep this import here to avoid circular imports
-    from ether._spec.ether_spec import EtherSpec
     from ether.core import Ether
 
+
+from ether._errors.errors import RegistrationError
+from ether._spec.ether_spec import EtherSpec
 
 from .singleton import Singleton
 
@@ -132,8 +132,6 @@ def register_spec(
         ...     dim: int
         ...     note: str = "extra"
     """
-    from ether._spec.ether_spec import EtherSpec
-    from ether.errors import RegistrationError
 
     def _decorator(model_cls: type[BaseModel]) -> type[BaseModel]:
         # Check if already registered

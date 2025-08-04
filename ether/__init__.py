@@ -54,16 +54,13 @@ __all__ = [
 
 
 # --- Imports come last ---
-# We will try importing from the "private" subpackages
-# directly to avoid circular imports.
-#
 # For devs: If importing internally, use direct imports
 
 from ._attachment.attachment_model import Attachment
+from ._errors.errors import ConversionError, RegistrationError
 from ._node.node import Node
 from ._registry.registry import Registry
 from ._spec.ether_spec import EtherSpec
 from ._view.model_view import ModelView
 from .core import Ether
-from .errors import ConversionError, RegistrationError
 from .kinds import EmbeddingModel, TextModel, TokenModel

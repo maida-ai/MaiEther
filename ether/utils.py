@@ -11,7 +11,7 @@ from datetime import UTC, datetime
 from types import FunctionType
 from typing import Any, get_type_hints
 
-from ether.errors import ErrorStatus
+from ether._errors.status import ErrorStatus
 
 
 def has_valid_arg_types(
