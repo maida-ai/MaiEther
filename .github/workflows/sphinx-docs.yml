@@ -30,8 +30,26 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  # Flag to enable/disable documentation workflow
+  # Set to 'true' to enable, 'false' to disable
+  check-enabled:
+    runs-on: ubuntu-latest
+    outputs:
+      enabled: ${{ steps.check-flag.outputs.enabled }}
+    steps:
+      - name: Check if documentation workflow is enabled
+        id: check-flag
+        run: |
+          # Set this to 'true' to enable documentation publishing
+          # Set this to 'false' to disable documentation publishing
+          echo "enabled=false" >> "$GITHUB_OUTPUT"
+          echo "Documentation workflow is currently DISABLED"
+          echo "To enable, change 'enabled=false' to 'enabled=true' in this step"
+
   docs-directory:
     runs-on: ubuntu-latest
+    needs: check-enabled
+    if: needs.check-enabled.outputs.enabled == 'true'
     outputs:
       docs-exists: ${{ steps.check-docs.outputs.exists }}
     steps:
@@ -59,8 +77,8 @@ jobs:
 
   build:
     runs-on: ubuntu-latest
-    needs: docs-directory
-    if: needs.docs-directory.outputs.docs-exists == 'true'
+    needs: [check-enabled, docs-directory]
+    if: needs.check-enabled.outputs.enabled == 'true' && needs.docs-directory.outputs.docs-exists == 'true'
     timeout-minutes: 30
     steps:
       - name: Checkout
@@ -133,8 +151,8 @@ jobs:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
-    needs: [docs-directory, build]
-    if: github.ref == 'refs/heads/main' && needs.docs-directory.outputs.docs-exists == 'true'
+    needs: [check-enabled, docs-directory, build]
+    if: github.ref == 'refs/heads/main' && needs.check-enabled.outputs.enabled == 'true' && needs.docs-directory.outputs.docs-exists == 'true'
     steps:
       - name: Deploy to GitHub Pages
         id: deployment
