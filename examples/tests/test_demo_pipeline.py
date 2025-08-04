@@ -223,3 +223,55 @@ class TestDemoPipeline:
             tokenizer.process(valid_eth)
 
         assert "TokenizerNode expects one of: text.v1, got text.v2" in str(exc_info.value)
+
+    def test_demo_pipeline_no_lineage_input(self) -> None:
+        """Test that the demo pipeline handles input envelopes without lineage."""
+        text_model = TextModel(text="Test text without lineage")
+        initial_eth = Ether(text_model)
+
+        # Remove lineage from initial envelope
+        if "lineage" in initial_eth.metadata:
+            del initial_eth.metadata["lineage"]
+
+        tokenizer = TokenizerNode()
+        embedder = EmbedderNode()
+
+        # Process through pipeline
+        tokenized_eth = tokenizer.process(initial_eth)
+        final_eth = embedder.process(tokenized_eth)
+
+        # Verify final envelope properties
+        assert final_eth.kind == "embedding"
+        assert final_eth.schema_version == 1
+
+        # Verify lineage was created correctly
+        assert "lineage" in final_eth.metadata
+        assert len(final_eth.metadata["lineage"]) == 2
+
+    def test_demo_pipeline_with_existing_lineage(self) -> None:
+        """Test that the demo pipeline preserves existing lineage information."""
+        text_model = TextModel(text="Test text with existing lineage")
+        initial_eth = Ether(text_model)
+
+        # Add some existing lineage to the initial envelope
+        initial_eth.metadata["lineage"] = [{"node": "previous-node", "version": "1.0.0", "ts": "2023-01-01T00:00:00Z"}]
+
+        tokenizer = TokenizerNode()
+        embedder = EmbedderNode()
+
+        # Process through pipeline
+        tokenized_eth = tokenizer.process(initial_eth)
+        final_eth = embedder.process(tokenized_eth)
+
+        # Verify final envelope properties
+        assert final_eth.kind == "embedding"
+        assert final_eth.schema_version == 1
+
+        # Verify lineage was preserved and extended
+        assert "lineage" in final_eth.metadata
+        assert len(final_eth.metadata["lineage"]) == 3  # previous + tokenizer + embedder
+
+        # Check that original lineage was preserved
+        assert final_eth.metadata["lineage"][0]["node"] == "previous-node"
+        assert final_eth.metadata["lineage"][1]["node"] == "tokenizer"
+        assert final_eth.metadata["lineage"][2]["node"] == "embedder"
