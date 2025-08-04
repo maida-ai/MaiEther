@@ -2,6 +2,177 @@
 
 MaiEther provides a standardized envelope for safe data transport between nodes/layers in composable ML/data systems. This guide will help you get started with using Ether and creating new bindings.
 
+## Developer Setup
+
+### Prerequisites
+
+- **Python 3.11+**: MaiEther requires Python 3.11 or higher
+- **Poetry**: For dependency management and project setup
+- **Git**: For version control
+
+### Environment Setup
+
+1. **Clone the repository**:
+   ```bash
+   git clone https://github.com/maida-ai/MaiEther.git
+   cd MaiEther
+   ```
+
+2. **Install Poetry** (if not already installed):
+   ```bash
+   curl -sSL https://install.python-poetry.org | python3 -
+   ```
+
+3. **Install dependencies**:
+   ```bash
+   poetry install --with dev
+   ```
+
+   This installs all dependencies including development tools for testing, linting, and documentation.
+
+### Running Tests
+
+The project uses pytest for testing with comprehensive coverage requirements.
+
+**Run all tests**:
+```bash
+poetry run pytest
+```
+
+**Run tests with coverage**:
+```bash
+poetry run pytest --cov=ether --cov-report=term-missing
+```
+
+**Run specific test files**:
+```bash
+poetry run pytest tests/core/test_creation.py
+```
+
+**Run tests excluding slow/integration tests**:
+```bash
+poetry run pytest -m "not slow and not integration"
+```
+
+**Run tests with verbose output**:
+```bash
+poetry run pytest -v
+```
+
+### Running the Demo
+
+The project includes a demo script that demonstrates a complete pipeline from text to embeddings.
+
+**Run the demo**:
+```bash
+poetry run python examples/run_demo.py
+```
+
+The demo will:
+1. Create a TextModel with sample text
+2. Process it through a TokenizerNode
+3. Process it through an EmbedderNode
+4. Display Ether summaries at each step
+5. Verify the final output meets acceptance criteria
+
+Expected output should show:
+- Ether envelope summaries at each processing step
+- Kind and schema version information
+- Payload and metadata keys
+- Lineage tracking
+- ✅ All acceptance criteria met!
+
+### Code Quality and Linting
+
+**Run linting**:
+```bash
+poetry run ruff check .
+```
+
+**Format code**:
+```bash
+poetry run black .
+```
+
+**Type checking**:
+```bash
+poetry run mypy ether/
+```
+
+### Building Documentation
+
+**Build Sphinx documentation**:
+```bash
+cd docs
+poetry run make html
+```
+
+The built documentation will be available in `docs/_build/html/`.
+
+### Development Workflow
+
+1. **Create a feature branch**:
+   ```bash
+   git checkout -b feature/your-feature-name
+   ```
+
+2. **Make your changes** and ensure tests pass:
+   ```bash
+   poetry run pytest
+   ```
+
+3. **Run linting and formatting**:
+   ```bash
+   poetry run ruff check .
+   poetry run black .
+   ```
+
+4. **Commit your changes** with a descriptive message.
+
+### CI/CD Pipeline
+
+The project uses GitHub Actions for continuous integration. The CI pipeline:
+
+- Runs on Python 3.11
+- Installs dependencies with Poetry
+- Runs all tests with coverage
+- Enforces 90% code coverage minimum
+- Uploads coverage reports to Codecov
+
+To ensure your changes pass CI:
+
+```bash
+# Run the same commands as CI
+poetry run pytest \
+  tests/ \
+  examples/tests/ \
+  -m "not integration and not slow" \
+  --cov=ether \
+  --cov=examples \
+  --cov-report=xml \
+  --cov-report=term-missing \
+  --cov-fail-under=90 \
+  --strict-markers \
+  --tb=short
+```
+
+### Troubleshooting
+
+**Common Issues**:
+
+1. **Poetry not found**: Install Poetry using the official installer
+2. **Python version mismatch**: Ensure you're using Python 3.11+
+3. **Test failures**: Check that all dependencies are installed with `poetry install --with dev`
+4. **Coverage below 90%**: Add tests for uncovered code paths
+
+**Getting Help**:
+
+- Check the [main README](../README.md) for detailed specifications
+- Review existing tests in the `tests/` directory for examples
+- Check the [GitHub Issues](https://github.com/maida-ai/MaiEther/issues) for known problems
+
+---
+
 ## Quick Start
 
 ### Basic Usage
