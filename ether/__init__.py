@@ -143,9 +143,12 @@ class Registry(metaclass=Singleton):
 # --- Imports come last ---
 # We will try importing from the "private" subpackages
 # directly to avoid circular imports.
+#
+# For devs: If importing internally, use direct imports
 
+
+from ._attachment.attachment_model import Attachment
 from ._view.model_view import ModelView
-from .attachment import Attachment
 from .core import Ether
 from .errors import ConversionError, RegistrationError
 from .kinds import EmbeddingModel, TextModel, TokenModel

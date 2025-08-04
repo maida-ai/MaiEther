@@ -228,12 +228,14 @@ class TestNumPyNotAvailable:
 
     @pytest.fixture(autouse=True)
     def setup(self, monkeypatch: pytest.MonkeyPatch) -> Generator:
+        # TODO: This is a hack -- fix it
         # Store original state
         original_numpy = sys.modules.get("numpy")
-        original_flag = getattr(ether.attachment, "NUMPY_AVAILABLE", None)
+        original_flag = getattr(ether._attachment.attachment_model, "NUMPY_AVAILABLE", None)
 
         # Patch NumPy to be unavailable
         monkeypatch.setitem(sys.modules, "numpy", None)
+        importlib.reload(sys.modules["ether._attachment.attachment_model"])
         importlib.reload(sys.modules["ether.attachment"])
 
         yield
@@ -242,7 +244,8 @@ class TestNumPyNotAvailable:
         if original_numpy is not None:
             sys.modules["numpy"] = original_numpy
         if original_flag is not None:
-            ether.attachment.NUMPY_AVAILABLE = original_flag
+            ether._attachment.attachment_model.NUMPY_AVAILABLE = original_flag
+        importlib.reload(sys.modules["ether._attachment.attachment_model"])
         importlib.reload(sys.modules["ether.attachment"])
 
     def test_unavailable_flag(self) -> None:

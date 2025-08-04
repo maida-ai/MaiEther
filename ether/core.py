@@ -35,8 +35,8 @@ from pydantic import BaseModel, Field, PrivateAttr, ValidationError
 
 from ether import Registry
 
+from ._attachment.attachment_model import Attachment
 from ._view.model_view import ModelView
-from .attachment import Attachment
 from .errors import ConversionError, RegistrationError
 from .spec import EtherSpec
 from .utils import rfc3339_now
