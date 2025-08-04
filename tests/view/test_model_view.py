@@ -4,8 +4,6 @@ This module tests the ModelView class which provides lazy access to model data
 stored in Ether envelopes without copying the data.
 """
 
-from typing import Any
-
 import pytest
 from pydantic import BaseModel
 
@@ -73,7 +71,6 @@ class TestModelView:
 
     def test_unregistered_model_raises_error(self):
         """Test that using an unregistered model raises ValueError."""
-        from pydantic import BaseModel
 
         class UnregisteredModel(BaseModel):
             field: str
@@ -319,8 +316,8 @@ class TestModelView:
     )
     def test_view_with_all_model_types(
         self,
-        model_class: BaseModel,
-        model_input: dict[str, Any],
+        model_class,
+        model_input,
     ) -> None:
         """Test view with all available model types."""
         eth = Ether.from_model(model_class(**model_input))
