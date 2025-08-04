@@ -33,6 +33,7 @@ from typing import Any, TypeVar
 
 from pydantic import BaseModel, Field, PrivateAttr, ValidationError
 
+import ether
 from ether import Registry
 
 from .attachment import Attachment
@@ -387,7 +388,7 @@ class Ether(BaseModel):
         if "created_at" not in self.metadata:
             self.metadata["created_at"] = rfc3339_now()
 
-    def as_model(self, target_model: type[ModelT], *, require_kind: bool = False) -> ModelT:
+    def as_model(self, target_model: type[BaseModel], *, require_kind: bool = False) -> type[BaseModel]:
         """Convert the Ether envelope to a registered Pydantic model.
 
         Converts the Ether envelope to a target Pydantic model according to
@@ -482,6 +483,32 @@ class Ether(BaseModel):
                     f"Missing required fields: {sorted(missing)}; provided={sorted(data.keys())}"
                 ) from ve
             raise ve
+
+    def view_model(self, target_model: BaseModel) -> "ether.ModelView[BaseModel]":
+        """Create a lazy view for accessing model data without expensive copies.
+
+        This method creates a ModelView that provides attribute-based access to
+        model fields stored in the Ether envelope without creating a copy of the
+        data. The view maps field names to the appropriate section (payload,
+        metadata, or extra_fields) based on the model's EtherSpec.
+
+        Args:
+            target_model: The model class to create a view for
+
+        Returns:
+            A ModelView instance that provides lazy access to the model's fields
+
+        Examples:
+            >>> from ether import Ether, TextModel
+            >>> eth = Ether.from_model(TextModel(text="Hello", lang="en"))
+            >>> view = eth.view_model(TextModel)
+            >>> view.text  # Returns "Hello" without copying
+            >>> view.lang  # Returns "en" without copying
+            >>> model = view.as_model()  # Convert back to model when needed
+        """
+        from .view import ModelView
+
+        return ModelView[target_model](self)
 
     def summary(self) -> dict[str, Any]:
         """Generate a summary of the Ether envelope contents.

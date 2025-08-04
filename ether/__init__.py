@@ -49,6 +49,7 @@ __all__ = [
     "TextModel",
     "TokenModel",
     "EmbeddingModel",
+    "ModelView",
 ]
 
 
@@ -147,3 +148,4 @@ from .errors import ConversionError, RegistrationError
 from .kinds import EmbeddingModel, TextModel, TokenModel
 from .node import Node
 from .spec import EtherSpec
+from .view import ModelView
